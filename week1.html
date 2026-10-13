@@ -1,0 +1,732 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Concept-based Week 1 notes for IIT Madras BSDA2001: neural networks, PyTorch, tensors, linear regression and training.">
+  <title>Week 1 — Foundations of Deep Learning | BSDA2001</title>
+
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)'], ['$', '$']],
+        displayMath: [['\\[', '\\]'], ['$$', '$$']]
+      }
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="script.js"></script>
+</head>
+
+<body>
+<header class="site-header">
+  <div class="topbar">
+    <a class="brand" href="index.html">BSDA2001 · Deep Learning</a>
+    <nav class="site-nav" aria-label="Main navigation">
+      <a href="index.html">Introduction</a>
+      <a href="week1.html" aria-current="page">Week 1</a>
+      <a href="week2.html">Week 2</a>
+    </nav>
+  </div>
+  <div class="page-intro">
+    <h1>Week 1 — Foundations of Deep Learning</h1>
+    <p>
+      Understand how artificial neurons work, how neural networks are built,
+      how tensors represent data, and how a model learns from examples.
+      These notes are organized by concept, with additional focus on skills
+      relevant to Week 1 Practice Assignment 1 and Graded Assignment 1.
+    </p>
+  </div>
+</header>
+
+<main class="page-layout">
+  <nav class="toc" aria-label="On this page">
+    <strong>Week 1 topics</strong>
+    <a href="#foundations">AI, machine learning and deep learning</a>
+    <a href="#neuron">Neuron, weights and bias</a>
+    <a href="#neuron-history">McCulloch–Pitts neuron and perceptron</a>
+    <a href="#architecture">Layers and feedforward networks</a>
+    <a href="#activations">Activation functions</a>
+    <a href="#tensors">PyTorch and tensors</a>
+    <a href="#environment">Environment and common errors</a>
+    <a href="#regression">Linear regression and MSE</a>
+    <a href="#learning">Training and optimization</a>
+    <a href="#serialization">Saving and loading models</a>
+    <a href="#habits">Practical deep-learning habits</a>
+    <a href="#ga-practice">Practice and GA focus</a>
+    <a href="#assignments">Assignments</a>
+    <a href="#formula-sheet">Formula sheet</a>
+  </nav>
+
+  <article class="content">
+
+    <section id="foundations">
+      <h2>1. AI, machine learning and deep learning</h2>
+      <p>
+        <strong>Artificial Intelligence (AI)</strong> is the broad field of
+        building systems that perform tasks associated with intelligent
+        behaviour. <strong>Machine learning (ML)</strong> is a part of AI in
+        which systems learn patterns from data rather than relying only on
+        manually written rules. <strong>Deep learning</strong> is a part of ML
+        that uses neural networks with multiple layers.
+      </p>
+      <div class="note">
+        <strong>Relationship:</strong> Deep learning is a subset of machine
+        learning, which is a subset of AI.
+      </div>
+      <h3>What does a neural network learn?</h3>
+      <p>
+        A neural network contains adjustable parameters, mainly weights and
+        biases. During training, it uses examples to adjust these parameters
+        so that its predictions become more useful for the task.
+      </p>
+      <ul>
+        <li><strong>Input:</strong> information supplied to the model.</li>
+        <li><strong>Prediction:</strong> the model's output.</li>
+        <li><strong>Target:</strong> the expected answer in supervised learning.</li>
+        <li><strong>Loss:</strong> a numerical measure of prediction error.</li>
+        <li><strong>Training:</strong> the process of adjusting parameters to reduce loss.</li>
+      </ul>
+    </section>
+
+    <section id="neuron">
+      <h2>2. The artificial neuron: weights, bias and output</h2>
+      <p>
+        An artificial neuron receives inputs, scales them by weights, adds a
+        bias and applies an activation function.
+      </p>
+      <div class="eq">
+        \[
+          z = w_1x_1 + w_2x_2 + \cdots + w_nx_n + b
+        \]
+        \[
+          a = \phi(z)
+        \]
+      </div>
+      <ul>
+        <li><strong>Input \(x_i\):</strong> one feature supplied to the neuron.</li>
+        <li><strong>Weight \(w_i\):</strong> controls the contribution of an input.</li>
+        <li><strong>Bias \(b\):</strong> an adjustable offset added to the weighted sum.</li>
+        <li><strong>Pre-activation \(z\):</strong> the weighted sum after adding bias.</li>
+        <li><strong>Activation \(\phi\):</strong> transforms the pre-activation into the neuron's output.</li>
+      </ul>
+
+      <h3>Worked example</h3>
+      <p>Suppose \(x_1=2\), \(x_2=3\), \(w_1=0.5\), \(w_2=-1\), and \(b=1\).</p>
+      <div class="eq">
+        \[
+          z = (0.5)(2) + (-1)(3) + 1 = -1
+        \]
+      </div>
+      <p>
+        The final output depends on the activation function. With ReLU,
+        \(a=\max(0,-1)=0\). Without an activation, the output would be \(z=-1\).
+      </p>
+
+      <h3>Counting trainable parameters</h3>
+      <p>
+        A fully connected layer with \(n\) input features and \(m\) neurons has
+        \(n \times m\) weights and \(m\) biases.
+      </p>
+      <div class="eq">
+        \[
+          \text{Parameters} = nm + m = m(n+1)
+        \]
+      </div>
+      <p>
+        Example: a layer with 10 inputs and 4 neurons has
+        \(10 \times 4 + 4 = 44\) trainable parameters.
+      </p>
+      <pre><code>import torch.nn as nn
+
+layer = nn.Linear(10, 4)
+print(sum(p.numel() for p in layer.parameters()))  # 44</code></pre>
+    </section>
+
+    <section id="neuron-history">
+      <h2>3. McCulloch–Pitts neuron and perceptron</h2>
+      <p>
+        The McCulloch–Pitts neuron is a simplified binary model. It applies a
+        threshold rule to its inputs. A perceptron is a related model that uses
+        weighted inputs and a threshold decision.
+      </p>
+      <div class="eq">
+        \[
+          y =
+          \begin{cases}
+            1, & \text{if } z \geq \theta \\
+            0, & \text{otherwise}
+          \end{cases}
+        \]
+      </div>
+      <p>
+        The threshold \(\theta\) determines when the neuron activates. In a
+        modern neuron, the threshold behaviour is often represented through
+        weights, bias and an activation function.
+      </p>
+      <h3>Important limitation</h3>
+      <p>
+        A single perceptron creates a linear decision boundary. It cannot
+        correctly represent every possible classification pattern. XOR is a
+        standard example because its classes cannot be separated by one
+        straight line.
+      </p>
+    </section>
+
+    <section id="architecture">
+      <h2>4. Neural-network architecture and feedforward networks</h2>
+      <p>
+        A feedforward network passes information from input to output without
+        sending the output of a later layer back to an earlier layer.
+      </p>
+      <ul>
+        <li><strong>Input layer:</strong> receives the features.</li>
+        <li><strong>Hidden layers:</strong> transform the representation of the input.</li>
+        <li><strong>Output layer:</strong> produces the prediction.</li>
+      </ul>
+      <p>For a layer \(l\), the computation is commonly written as:</p>
+      <div class="eq">
+        \[
+          z^{(l)} = W^{(l)}h^{(l-1)} + b^{(l)}
+        \]
+        \[
+          h^{(l)} = \phi^{(l)}(z^{(l)})
+        \]
+      </div>
+      <p>
+        Here, \(h^{(l-1)}\) is the previous layer's output. The network applies
+        this calculation layer by layer until it produces the final prediction.
+      </p>
+      <h3>Why use multiple layers?</h3>
+      <p>
+        Hidden layers can learn intermediate representations. Nonlinear
+        activation functions allow the network to model nonlinear relationships.
+        If every layer were purely linear, stacking those layers would still
+        produce an overall linear transformation.
+      </p>
+      <h3>Universal approximation — an initial intuition</h3>
+      <p>
+        Under suitable conditions, a feedforward network with a suitable
+        nonlinear activation and enough hidden units can approximate a broad
+        class of continuous functions. This is a statement about representation
+        capacity; it does not guarantee that training will find the desired
+        parameters or that the model will generalize well.
+      </p>
+    </section>
+
+    <section id="activations">
+      <h2>5. Activation functions</h2>
+      <p>
+        The activation function transforms a neuron's weighted sum. Nonlinear
+        activations allow a network to learn nonlinear patterns.
+      </p>
+      <h3>Sigmoid</h3>
+      <div class="eq">
+        \[
+          \sigma(z)=\frac{1}{1+e^{-z}}
+        \]
+      </div>
+      <p>
+        Sigmoid maps real-valued inputs to values between 0 and 1. It is useful
+        for representing a binary probability in an appropriate output setup.
+        Very large positive or negative inputs can lead to small gradients.
+      </p>
+      <h3>Tanh</h3>
+      <div class="eq">
+        \[
+          \tanh(z) \in (-1,1)
+        \]
+      </div>
+      <p>Tanh produces outputs between -1 and 1 and is centred around zero.</p>
+
+      <h3>ReLU</h3>
+      <div class="eq">
+        \[
+          \operatorname{ReLU}(z)=\max(0,z)
+        \]
+      </div>
+      <p>
+        ReLU returns zero for negative inputs and returns the input itself for
+        positive inputs. It is commonly used in hidden layers.
+      </p>
+
+      <h3>Leaky ReLU</h3>
+      <div class="eq">
+        \[
+          \operatorname{LeakyReLU}(z)=
+          \begin{cases}
+            z, & z \geq 0 \\
+            \alpha z, & z < 0
+          \end{cases}
+        \]
+      </div>
+      <p>
+        Leaky ReLU allows a small negative output instead of setting every
+        negative input to zero.
+      </p>
+
+      <table>
+        <thead><tr><th>Function</th><th>Output range</th><th>Common use / note</th></tr></thead>
+        <tbody>
+          <tr><td>Sigmoid</td><td>(0, 1)</td><td>Binary probability output when paired with the correct loss</td></tr>
+          <tr><td>Tanh</td><td>(-1, 1)</td><td>Zero-centred activation</td></tr>
+          <tr><td>ReLU</td><td>[0, infinity)</td><td>Common hidden-layer activation</td></tr>
+          <tr><td>Leaky ReLU</td><td>Negative and positive values</td><td>Retains a small negative slope</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="tensors">
+      <h2>6. PyTorch and tensors</h2>
+      <p>
+        A tensor is a multidimensional container for numerical data. A scalar
+        has no dimensions, a vector has one dimension, a matrix has two, and
+        higher-dimensional tensors can represent batches of images or other data.
+      </p>
+      <table>
+        <thead><tr><th>Object</th><th>Example shape</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td>Scalar</td><td><code>()</code></td><td>One value</td></tr>
+          <tr><td>Vector</td><td><code>(3,)</code></td><td>Three values</td></tr>
+          <tr><td>Matrix</td><td><code>(2, 3)</code></td><td>Two rows, three columns</td></tr>
+          <tr><td>Image batch</td><td><code>(N, C, H, W)</code></td><td>Batch, channels, height, width</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Creating tensors</h3>
+      <pre><code>import torch
+
+x = torch.tensor([2, 4, 6])
+zeros = torch.zeros((2, 3))
+ones = torch.ones((2, 3))
+empty = torch.empty((2, 3))       # values are not initialized
+sequence = torch.arange(0, 10, 2)
+uniform = torch.rand((2, 3))      # uniform random values
+normal = torch.randn((2, 3))      # standard normal values
+
+print(x.shape)
+print(x.dtype)</code></pre>
+      <p>
+        <code>torch.tensor()</code> creates a tensor from supplied values.
+        <code>zeros()</code> and <code>ones()</code> initialize every value.
+        <code>empty()</code> allocates memory without initializing the values,
+        so do not assume it contains zeros.
+      </p>
+
+      <h3>Tensor operations</h3>
+      <pre><code>x = torch.tensor([[1., 2.], [3., 4.]])
+
+print(x + 2)          # elementwise addition
+print(x * 3)          # scalar multiplication
+print(x.sum())        # sum of all elements
+print(x.mean(dim=0))  # mean down rows, one value per column
+print(x.T)            # transpose
+print(x @ x)          # matrix multiplication</code></pre>
+      <p>
+        Elementwise multiplication is different from matrix multiplication.
+        The <code>@</code> operator performs matrix multiplication when the
+        tensor dimensions are compatible.
+      </p>
+
+      <h3>Indexing, slicing and reshaping</h3>
+      <pre><code>x = torch.arange(12)
+matrix = x.reshape(3, 4)
+
+first_row = matrix[0]
+first_column = matrix[:, 0]
+submatrix = matrix[:2, 1:3]
+flat = matrix.flatten()
+
+print(matrix.shape)  # torch.Size([3, 4])</code></pre>
+      <p>
+        Reshaping changes the arrangement of values, not their total count.
+        A tensor with 12 elements can be reshaped to (3, 4), (2, 6) or (4, 3),
+        but not (5, 3).
+      </p>
+      <p>
+        In Python, indexing begins at zero. In <code>matrix[:2, 1:3]</code>,
+        the first slice selects rows 0 and 1, and the second selects columns 1
+        and 2.
+      </p>
+
+      <h3>NumPy integration</h3>
+      <pre><code>import numpy as np
+import torch
+
+array = np.array([1.0, 2.0, 3.0], dtype=np.float32)
+tensor = torch.from_numpy(array)
+array_again = tensor.numpy()
+
+# For a tensor that tracks gradients:
+safe_array = tensor.detach().cpu().numpy()</code></pre>
+      <p>
+        A CPU tensor created with <code>torch.from_numpy()</code> can share
+        memory with the NumPy array. Changes to one may affect the other.
+        A tensor requiring gradients should generally be detached before
+        converting it to NumPy.
+      </p>
+    </section>
+
+    <section id="environment">
+      <h2>7. Environment setup, reproducibility and common errors</h2>
+      <h3>Installing and checking PyTorch</h3>
+      <p>
+        Use the
+        <a href="https://pytorch.org/get-started/locally/" target="_blank" rel="noopener">official PyTorch installation selector</a>
+        to choose a suitable command for your operating system and hardware.
+      </p>
+      <pre><code>import torch
+
+print(torch.__version__)
+print("CUDA available:", torch.cuda.is_available())</code></pre>
+      <p>
+        If importing PyTorch fails, check whether it was installed into the same
+        Python environment used by your notebook or editor.
+      </p>
+
+      <h3>Reproducibility and random seeds</h3>
+      <pre><code>import random
+import numpy as np
+import torch
+
+random.seed(42)
+np.random.seed(42)
+torch.manual_seed(42)
+
+if torch.cuda.is_available():
+    torch.cuda.manual_seed_all(42)</code></pre>
+      <p>
+        Random seeds help make random initialization and other random operations
+        repeatable in the same setup. They do not guarantee identical results
+        across every device, library version or operation.
+      </p>
+
+      <h3>CPU and GPU</h3>
+      <pre><code>device = torch.device(
+    "cuda" if torch.cuda.is_available() else "cpu"
+)
+
+x = torch.tensor([1.0, 2.0]).to(device)
+model = model.to(device)  # after defining model</code></pre>
+      <p>
+        The model and the tensors used with it must be on compatible devices.
+        CUDA is commonly used for NVIDIA GPU acceleration when available.
+      </p>
+
+      <h3>Common errors and how to debug them</h3>
+      <ul>
+        <li><strong>Shape mismatch:</strong> inspect <code>.shape</code> and check the dimensions required by the operation.</li>
+        <li><strong>Wrong dtype:</strong> regression inputs and targets commonly use floating-point tensors; class-index labels for cross-entropy are typically integer class IDs.</li>
+        <li><strong>Device mismatch:</strong> move both model and data to the same device.</li>
+        <li><strong>Unexpected broadcasting:</strong> check whether tensor dimensions are automatically expanded during an operation.</li>
+        <li><strong>Tensor-to-NumPy error:</strong> use <code>tensor.detach().cpu().numpy()</code> when gradients are being tracked.</li>
+        <li><strong>Autograd in-place error:</strong> avoid modifying tensors in place when autograd needs their earlier values.</li>
+      </ul>
+    </section>
+
+    <section id="regression">
+      <h2>8. Linear regression and mean squared error</h2>
+      <p>
+        Linear regression predicts a numerical value using a linear relationship.
+        A one-input model is:
+      </p>
+      <div class="eq">\[\hat{y}=wx+b\]</div>
+      <p>
+        If \(w=2\), \(x=3\) and \(b=1\), then \(\hat{y}=2(3)+1=7\).
+        The model's weight and bias are learned from data.
+      </p>
+
+      <h3>Create and load data</h3>
+      <pre><code>import torch
+from torch.utils.data import TensorDataset, DataLoader
+
+X = torch.linspace(-3, 3, 100).reshape(-1, 1)
+y = 2 * X + 1 + 0.2 * torch.randn_like(X)
+
+dataset = TensorDataset(X, y)
+loader = DataLoader(dataset, batch_size=16, shuffle=True)</code></pre>
+      <p>
+        A Dataset represents examples and their targets. A DataLoader groups
+        examples into batches and can shuffle their order during training.
+      </p>
+
+      <h3>Visualize the data</h3>
+      <pre><code>import matplotlib.pyplot as plt
+
+plt.scatter(X.numpy(), y.numpy(), s=18)
+plt.xlabel("x")
+plt.ylabel("y")
+plt.title("Synthetic data for linear regression")
+plt.show()</code></pre>
+      <p>
+        Visualizing the data helps identify trends, outliers and whether a
+        straight-line model is a reasonable starting point.
+      </p>
+
+      <h3>Define the model</h3>
+      <pre><code>import torch.nn as nn
+
+model = nn.Linear(in_features=1, out_features=1)
+predictions = model(X)</code></pre>
+      <p>
+        <code>nn.Linear(1, 1)</code> contains one weight and one bias and
+        implements an affine transformation.
+      </p>
+
+      <h3>Mean squared error (MSE)</h3>
+      <div class="eq">
+        \[
+          \operatorname{MSE} =
+          \frac{1}{N}\sum_{i=1}^{N}(y_i-\hat{y}_i)^2
+        \]
+      </div>
+      <p>
+        MSE averages squared differences between the true targets and the
+        predictions. Squaring makes errors non-negative and gives larger
+        errors more influence.
+      </p>
+      <pre><code>def mse_loss(y_pred, y_true):
+    return ((y_pred - y_true) ** 2).mean()</code></pre>
+      <p>
+        Predictions and targets must have compatible shapes. Accidental
+        broadcasting can produce a loss that does not represent the intended
+        comparison.
+      </p>
+    </section>
+
+    <section id="learning">
+      <h2>9. How a neural network learns</h2>
+      <p>
+        Training repeatedly uses the predictions and errors to improve model
+        parameters. A typical training step has these parts:
+      </p>
+      <ol>
+        <li><strong>Forward pass:</strong> compute predictions from the inputs.</li>
+        <li><strong>Loss:</strong> compare predictions with the targets.</li>
+        <li><strong>Zero gradients:</strong> clear gradients left by the previous update.</li>
+        <li><strong>Backpropagation:</strong> calculate gradients of the loss with respect to parameters.</li>
+        <li><strong>Optimizer step:</strong> update the parameters using the gradients.</li>
+      </ol>
+
+      <div class="eq">
+        \[
+          \theta \leftarrow \theta - \eta\nabla_\theta L
+        \]
+      </div>
+      <ul>
+        <li>\(\theta\) represents parameters such as weights and biases.</li>
+        <li>\(\eta\) is the learning rate.</li>
+        <li>\(L\) is the loss.</li>
+        <li>\(\nabla_\theta L\) is the gradient of loss with respect to the parameters.</li>
+      </ul>
+      <p>
+        Gradient descent subtracts the gradient because the gradient locally
+        points toward increasing loss. The learning rate controls the size of
+        the update.
+      </p>
+
+      <h3>A complete linear-regression training loop</h3>
+      <pre><code>import torch
+import torch.nn as nn
+from torch.utils.data import TensorDataset, DataLoader
+
+X = torch.linspace(-3, 3, 100).reshape(-1, 1)
+y = 2 * X + 1 + 0.2 * torch.randn_like(X)
+
+loader = DataLoader(
+    TensorDataset(X, y),
+    batch_size=16,
+    shuffle=True
+)
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+model = nn.Linear(1, 1).to(device)
+optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
+
+def mse_loss(y_pred, y_true):
+    return ((y_pred - y_true) ** 2).mean()
+
+for epoch in range(100):
+    model.train()
+    total_loss = 0.0
+
+    for xb, yb in loader:
+        xb, yb = xb.to(device), yb.to(device)
+
+        optimizer.zero_grad()
+        predictions = model(xb)
+        loss = mse_loss(predictions, yb)
+        loss.backward()
+        optimizer.step()
+
+        total_loss += loss.item()
+
+    if (epoch + 1) % 10 == 0:
+        print(
+            f"Epoch {epoch + 1}, "
+            f"loss = {total_loss / len(loader):.4f}"
+        )</code></pre>
+
+      <h3>Important training terms</h3>
+      <ul>
+        <li><strong>Epoch:</strong> one complete pass through the training dataset.</li>
+        <li><strong>Batch:</strong> a subset of examples processed together.</li>
+        <li><strong>Learning rate:</strong> controls the size of parameter updates.</li>
+        <li><strong>Optimizer:</strong> uses gradients to update parameters.</li>
+        <li><strong>Initialization:</strong> provides starting values for weights and biases.</li>
+        <li><strong>Loss monitoring:</strong> helps reveal whether training is progressing.</li>
+      </ul>
+      <p>
+        A learning rate that is too high may make training unstable; one that is
+        too low may make training slow. Mini-batches balance computational
+        efficiency with frequent parameter updates.
+      </p>
+    </section>
+
+    <section id="serialization">
+      <h2>10. Saving and loading a trained model</h2>
+      <p>
+        Model serialization stores learned parameters so that they can be
+        reused later. For a PyTorch model, a common approach is to save its
+        state dictionary.
+      </p>
+      <pre><code># Save learned parameters
+torch.save(model.state_dict(), "model_weights.pth")
+
+# Recreate the same architecture before loading
+loaded_model = nn.Linear(1, 1)
+loaded_model.load_state_dict(
+    torch.load("model_weights.pth", map_location="cpu")
+)
+loaded_model.eval()</code></pre>
+      <p>
+        The architecture used for loading must match the architecture used
+        when saving. <code>eval()</code> switches the model to evaluation mode;
+        it does not itself calculate predictions.
+      </p>
+    </section>
+
+    <section id="habits">
+      <h2>11. Practical habits for successful deep learning</h2>
+      <ul>
+        <li>Check tensor shape, dtype and device when debugging.</li>
+        <li>Set random seeds when comparing experiments.</li>
+        <li>Choose initialization and learning rates thoughtfully.</li>
+        <li>Shuffle training data when appropriate.</li>
+        <li>Track loss rather than assuming the model is learning.</li>
+        <li>Keep training and evaluation data separate when measuring generalization.</li>
+        <li>Save model parameters and document important settings.</li>
+      </ul>
+      <h3>Parameters versus hyperparameters</h3>
+      <table>
+        <thead><tr><th>Learned parameters</th><th>Chosen hyperparameters</th></tr></thead>
+        <tbody>
+          <tr><td>Weights and biases</td><td>Learning rate</td></tr>
+          <tr><td>Updated during training</td><td>Batch size and number of epochs</td></tr>
+          <tr><td>Values optimized from data</td><td>Number of layers and hidden units</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="ga-practice">
+      <h2>12. Practice and graded-assignment focus</h2>
+      <p>
+        Use the following checklist to practise applying the concepts. It
+        describes relevant question patterns, not the exact questions on the
+        course portal.
+      </p>
+      <h3>ANN calculations and architecture</h3>
+      <ul>
+        <li>Given inputs, weights and bias, calculate the weighted sum and activation output.</li>
+        <li>Count weights and biases in a fully connected layer.</li>
+        <li>Identify input, hidden and output layers in a network diagram.</li>
+        <li>Explain why nonlinear activation functions are important.</li>
+        <li>Compare sigmoid, tanh, ReLU and Leaky ReLU by their formulas and output ranges.</li>
+      </ul>
+
+      <h3>Tensor and PyTorch questions</h3>
+      <ul>
+        <li>Choose between <code>tensor()</code>, <code>zeros()</code>, <code>ones()</code>, <code>arange()</code>, <code>rand()</code> and <code>randn()</code>.</li>
+        <li>Predict the shape after indexing, slicing, reshaping, transposing and flattening.</li>
+        <li>Distinguish elementwise operations from matrix multiplication.</li>
+        <li>Explain NumPy conversion, random seeds and device selection.</li>
+        <li>Find shape, dtype, device and broadcasting errors in short code snippets.</li>
+      </ul>
+
+      <h3>Linear regression and training</h3>
+      <ul>
+        <li>Explain data creation, visualization, Dataset, DataLoader and batching.</li>
+        <li>Calculate a linear prediction and MSE.</li>
+        <li>Identify the correct training-loop order.</li>
+        <li>Explain weight initialization, learning rate, shuffling and loss monitoring.</li>
+        <li>Explain how to save model parameters and load them into the same architecture.</li>
+      </ul>
+
+      <h3>Quick worked checks</h3>
+      <pre><code># 12 values can be reshaped to (3, 4)
+x = torch.arange(12)
+print(x.reshape(3, 4).shape)  # torch.Size([3, 4])
+
+# 10 inputs and 4 output neurons: 10*4 weights + 4 biases = 44
+layer = torch.nn.Linear(10, 4)
+print(sum(p.numel() for p in layer.parameters()))  # 44</code></pre>
+      <div class="note">
+        <strong>Remember the training cycle:</strong>
+        forward pass → calculate loss → clear gradients →
+        backpropagation → optimizer update → repeat.
+      </div>
+    </section>
+
+    <section id="assignments">
+      <h2>13. Week 1 assignments</h2>
+      <p>
+        Complete the assignments in the order shown in your course portal.
+        These notes support revision; the actual assignment questions and
+        submission requirements remain in the portal.
+      </p>
+      <ol>
+        <li><strong>Week 1 Practice Assignment 1</strong> — practise concepts and code tracing.</li>
+        <li><strong>Week 1 Graded Assignment 1</strong> — apply the week's concepts independently.</li>
+      </ol>
+      <div class="note">
+        When you make a mistake, identify whether it came from the concept,
+        arithmetic, tensor shape, data type, device, or training-loop logic.
+        Revisit that specific topic before trying a similar question again.
+      </div>
+    </section>
+
+    <section id="formula-sheet">
+      <h2>14. Week 1 formula sheet</h2>
+      <table>
+        <thead><tr><th>Concept</th><th>Formula</th><th>Remember</th></tr></thead>
+        <tbody>
+          <tr><td>Neuron weighted sum</td><td>\(z=w^Tx+b\)</td><td>Weights plus bias</td></tr>
+          <tr><td>Activation</td><td>\(a=\phi(z)\)</td><td>Transforms the weighted sum</td></tr>
+          <tr><td>Sigmoid</td><td>\(\sigma(z)=1/(1+e^{-z})\)</td><td>Output between 0 and 1</td></tr>
+          <tr><td>Tanh</td><td>\(\tanh(z)\)</td><td>Output between -1 and 1</td></tr>
+          <tr><td>ReLU</td><td>\(\max(0,z)\)</td><td>Negative inputs become zero</td></tr>
+          <tr><td>Linear regression</td><td>\(\hat y=wx+b\)</td><td>Numerical prediction</td></tr>
+          <tr><td>MSE</td><td>\(\frac{1}{N}\sum_i(y_i-\hat y_i)^2\)</td><td>Average squared error</td></tr>
+          <tr><td>Gradient descent</td><td>\(\theta\leftarrow\theta-\eta\nabla_\theta L\)</td><td>Update opposite the gradient</td></tr>
+          <tr><td>Layer computation</td><td>\(z^{(l)}=W^{(l)}h^{(l-1)}+b^{(l)}\)</td><td>Weighted sum of previous outputs</td></tr>
+          <tr><td>Layer activation</td><td>\(h^{(l)}=\phi(z^{(l)})\)</td><td>Apply the activation</td></tr>
+        </tbody>
+      </table>
+      <div class="note">
+        <strong>High-priority revision:</strong> neuron calculations, parameter
+        counting, tensor shapes, activation functions, MSE, the training-loop
+        sequence, random seeds, CPU/GPU handling, and model serialization.
+      </div>
+    </section>
+
+  </article>
+</main>
+
+<footer class="site-footer">
+  IIT Madras BS Data Science · Introduction to Deep Learning and Generative AI (BSDA2001)
+  <br>Study the concepts, work through the equations and run the code examples.
+</footer>
+</body>
+</html>
