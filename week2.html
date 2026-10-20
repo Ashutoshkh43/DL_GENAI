@@ -4,8 +4,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Concept-based Week 2 notes for IIT Madras BSDA2001: forward pass, losses, gradient descent, backpropagation, XOR, customer churn and Fashion-MNIST.">
-  <title>Week 2 — Learning, Backpropagation and Classification | BSDA2001</title>
+  <meta name="description" content="Detailed Week 2 notes for BSDA2001 Introduction to Deep Learning and Generative AI, including forward propagation, loss functions, gradient descent, backpropagation, XOR, customer churn, and Fashion MNIST.">
+
+  <title>Week 2 — Training Neural Networks | BSDA2001</title>
 
   <script>
     window.MathJax = {
@@ -16,417 +17,855 @@
     };
   </script>
   <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
   <link rel="stylesheet" href="styles.css">
   <script defer src="script.js"></script>
 </head>
 
 <body>
+
 <header class="site-header">
   <div class="topbar">
     <a class="brand" href="index.html">BSDA2001 · Deep Learning</a>
     <nav class="site-nav" aria-label="Main navigation">
       <a href="index.html">Introduction</a>
       <a href="week1.html">Week 1</a>
-      <a href="week2.html" aria-current="page">Week 2</a>
+      <a aria-current="page" href="week2.html">Week 2</a>
+      <a href="week3.html">Week 3</a>
     </nav>
   </div>
+
   <div class="page-intro">
-    <h1>Week 2 — Learning, Backpropagation and Classification</h1>
+    <h1>Week 2 — Training Neural Networks</h1>
     <p>
-      Connect the mathematics of neural-network learning to practical
-      classification problems. These concept-based notes cover the universal
-      approximation theorem, forward passes, loss functions, gradient descent,
-      backpropagation, XOR, customer churn and Fashion-MNIST, with focused
-      revision for Week 2 Practice Assignment 2 and Graded Assignment 2.
+      Understand how neural networks make predictions, measure their errors,
+      update their weights, and learn from data. These concept-based notes
+      cover the Universal Approximation Theorem, forward propagation,
+      loss functions, gradient descent, backpropagation, XOR, customer churn,
+      and Fashion MNIST classification.
     </p>
   </div>
 </header>
 
 <main class="page-layout">
+
   <nav class="toc" aria-label="On this page">
+    <strong>Course weeks</strong>
+    <a href="index.html">Introduction</a>
+    <a href="week1.html">Week 1</a>
+    <a href="week2.html" aria-current="page">Week 2</a>
+    <a href="week3.html">Week 3</a>
+    <hr class="sidebar-divider">
     <strong>Week 2 topics</strong>
-    <a href="#big-picture">The big picture</a>
-    <a href="#approximation">Universal approximation theorem</a>
-    <a href="#forward-pass">Forward pass and layer calculations</a>
-    <a href="#losses">Loss functions</a>
-    <a href="#gradient-descent">Gradient descent and learning rate</a>
-    <a href="#backpropagation">Backpropagation and chain rule</a>
-    <a href="#xor">XOR and nonlinear decision boundaries</a>
-    <a href="#churn">Customer churn classification</a>
-    <a href="#fashion-mnist">Fashion-MNIST classification</a>
-    <a href="#training-validation">Training and validation</a>
-    <a href="#ga-practice">Practice and GA focus</a>
-    <a href="#assignments">Assignments</a>
-    <a href="#revision">Formula sheet and self-test</a>
-    <a href="#references">References</a>
+    <a href="#big-picture">1. Big picture</a>
+    <a href="#uat">2. Universal Approximation Theorem</a>
+    <a href="#forward-pass">3. Forward pass</a>
+    <a href="#loss">4. Loss functions</a>
+    <a href="#gradient-descent">5. Gradient descent</a>
+    <a href="#churn">6. Customer churn prediction</a>
+    <a href="#backprop">7. Backpropagation</a>
+    <a href="#xor">8. XOR problem</a>
+    <a href="#fashion-overview">9. Fashion MNIST</a>
+    <a href="#fashion-model">10. Fashion MNIST MLP</a>
+    <a href="#fashion-forward">11. Fashion MNIST forward pass</a>
+    <a href="#fashion-training">12. Training loop</a>
+    <a href="#ga2">13. Graded Assignment 2 practice</a>
+    <a href="#fashion-validation">14. Validation loop</a>
+    <a href="#model-training">15. Model training and evaluation</a>
+    <a href="#formula-sheet">16. Formula sheet</a>
+    <a href="#practice2">17. Practice Assignment 2</a>
   </nav>
 
   <article class="content">
 
     <section id="big-picture">
-      <h2>1. From forward passes to learning: the big picture</h2>
+      <h2>1. The big picture: how a neural network learns</h2>
+
       <p>
-        A neural network starts with inputs, applies a sequence of weighted
-        transformations and activation functions, and produces a prediction.
-        During training, the prediction is compared with the expected target.
-        Backpropagation calculates how the parameters contributed to the error,
-        and an optimizer uses the gradients to update them.
+        In Week 1, we learned that a neural network consists of neurons,
+        weights, biases, activation functions, and layers. We also saw how
+        to create tensors and build a simple model in PyTorch.
       </p>
+
+      <p>
+        Week 2 focuses on the learning process. A network starts with
+        parameters that may be far from correct. It makes predictions,
+        measures how wrong they are, calculates how its parameters should
+        change, and updates those parameters repeatedly.
+      </p>
+
+      <h3>The complete learning cycle</h3>
+
       <ol>
-        <li><strong>Forward pass:</strong> calculate the prediction.</li>
-        <li><strong>Loss calculation:</strong> measure the difference between prediction and target.</li>
-        <li><strong>Backpropagation:</strong> calculate gradients using the chain rule.</li>
-        <li><strong>Optimization:</strong> update weights and biases.</li>
-        <li><strong>Repeat:</strong> train over batches and epochs.</li>
-        <li><strong>Validation:</strong> evaluate performance on data not used for parameter updates.</li>
+        <li><strong>Input:</strong> Supply a batch of examples to the model.</li>
+        <li><strong>Forward pass:</strong> Calculate predictions from the current weights and biases.</li>
+        <li><strong>Loss calculation:</strong> Compare predictions with the correct targets.</li>
+        <li><strong>Backward pass:</strong> Calculate gradients that describe how the loss changes with each parameter.</li>
+        <li><strong>Optimizer step:</strong> Update parameters using those gradients.</li>
+        <li><strong>Repeat:</strong> Continue for multiple batches and epochs.</li>
+        <li><strong>Validation:</strong> Evaluate performance on data not used to update the parameters.</li>
       </ol>
+
       <div class="note">
-        <strong>Keep the roles separate:</strong> the forward pass computes
-        outputs, the loss measures error, backpropagation computes gradients,
-        and the optimizer updates parameters.
+        <strong>Important distinction:</strong> The forward pass makes predictions.
+        The backward pass calculates gradients. The optimizer updates parameters.
+        These are three separate operations.
       </div>
+
+      <h3>Essential terminology</h3>
+
+      <table>
+        <thead>
+          <tr><th>Term</th><th>Meaning</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Parameter</td><td>A value learned by the model, such as a weight or bias.</td></tr>
+          <tr><td>Forward pass</td><td>Computing predictions from inputs and parameters.</td></tr>
+          <tr><td>Target</td><td>The correct output associated with an input.</td></tr>
+          <tr><td>Loss</td><td>A numerical measure of prediction error.</td></tr>
+          <tr><td>Gradient</td><td>The derivative of the loss with respect to a parameter.</td></tr>
+          <tr><td>Learning rate</td><td>A factor controlling the size of a gradient-based update.</td></tr>
+          <tr><td>Epoch</td><td>One complete pass through the training dataset.</td></tr>
+          <tr><td>Batch</td><td>A subset of training examples processed together.</td></tr>
+          <tr><td>Validation</td><td>Evaluating a model on data that is not used for parameter updates.</td></tr>
+        </tbody>
+      </table>
     </section>
 
-    <section id="approximation">
+    <section id="uat">
       <h2>2. Universal Approximation Theorem</h2>
+
+      <h3>2.1 What is the theorem?</h3>
+
       <p>
-        The Universal Approximation Theorem states, in simplified terms, that
-        a feedforward neural network with a suitable nonlinear activation and
-        enough hidden units can approximate a broad class of continuous
-        functions on a bounded domain to a desired level of accuracy, under
-        the theorem's assumptions.
+        The Universal Approximation Theorem describes the expressive power
+        of neural networks. Under suitable conditions, a feedforward neural
+        network with a hidden layer containing enough neurons and a suitable
+        nonlinear activation function can approximate a continuous function
+        on a compact domain as closely as desired.
       </p>
-      <h3>What does this mean intuitively?</h3>
+
       <p>
-        A network can combine many simple nonlinear transformations to
-        represent complicated input-output relationships. For example, a
-        sufficiently capable network may approximate a curved relationship
-        that a single straight line cannot represent.
+        In simpler words, a neural network can represent a wide variety of
+        complicated input-output relationships, even when those relationships
+        are not straight lines.
       </p>
-      <h3>What does the theorem not guarantee?</h3>
+
+      <h3>2.2 Why are hidden layers useful?</h3>
+
+      <p>
+        Consider a simple linear model:
+      </p>
+
+      <p class="eq">
+        \(y = wx+b\)
+      </p>
+
+      <p>
+        This model can represent a straight-line relationship between a
+        single input and output. Many real-world relationships are more
+        complicated: customer behaviour, image patterns, and interactions
+        among variables may not follow a straight line.
+      </p>
+
+      <p>
+        Hidden layers allow a network to combine intermediate features.
+        Nonlinear activation functions allow the network to represent
+        nonlinear relationships.
+      </p>
+
+      <h3>2.3 Why does nonlinearity matter?</h3>
+
+      <p>
+        Suppose every layer performs only a linear transformation:
+      </p>
+
+      <p class="eq">
+        \(h_1=W_1x+b_1\)
+      </p>
+
+      <p class="eq">
+        \(h_2=W_2h_1+b_2\)
+      </p>
+
+      <p>
+        Substituting the first equation into the second gives:
+      </p>
+
+      <p class="eq">
+        \(h_2=W_2(W_1x+b_1)+b_2\)
+      </p>
+
+      <p class="eq">
+        \(h_2=(W_2W_1)x+(W_2b_1+b_2)\)
+      </p>
+
+      <p>
+        This is still a linear transformation followed by a bias. Stacking
+        linear layers without nonlinear activations does not provide the
+        same expressive power as a nonlinear network.
+      </p>
+
+      <h3>2.4 Common nonlinear activation functions</h3>
+
+      <table>
+        <thead>
+          <tr><th>Activation</th><th>Formula</th><th>Typical behaviour</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Sigmoid</td>
+            <td>\(\sigma(x)=\frac{1}{1+e^{-x}}\)</td>
+            <td>Maps values to the interval (0, 1).</td>
+          </tr>
+          <tr>
+            <td>Tanh</td>
+            <td>\(\tanh(x)\)</td>
+            <td>Maps values to the interval (-1, 1).</td>
+          </tr>
+          <tr>
+            <td>ReLU</td>
+            <td>\(\max(0,x)\)</td>
+            <td>Returns zero for negative inputs and the input itself for positive inputs.</td>
+          </tr>
+          <tr>
+            <td>Leaky ReLU</td>
+            <td>\(\max(\alpha x,x)\)</td>
+            <td>Allows a small negative output when the input is negative.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>2.5 What the theorem does not guarantee</h3>
+
       <ul>
+        <li>It does not guarantee that a small network will approximate every function well.</li>
         <li>It does not guarantee that training will find the right parameters.</li>
-        <li>It does not guarantee that the network will generalize to unseen data.</li>
-        <li>It does not mean that every problem needs a very large network.</li>
-        <li>It does not say that adding more layers always improves performance.</li>
+        <li>It does not guarantee good performance on unseen data.</li>
+        <li>It does not say that one particular architecture is best for every task.</li>
+        <li>It does not mean that every function can be represented exactly by a finite network.</li>
       </ul>
-      <p>
-        The theorem concerns representational capacity. Successful training
-        also depends on data, architecture, initialization, optimization and
-        other practical choices.
-      </p>
+
+      <div class="note">
+        <strong>GA concept:</strong> The theorem concerns what a network can
+        approximate under suitable conditions. It is not a guarantee about
+        how quickly, or whether, an optimization algorithm will learn that
+        approximation.
+      </div>
+
+      <h3>Original GA-style example</h3>
+
+      <p><strong>Question:</strong> Which change is most important for allowing a multilayer feedforward network to represent nonlinear relationships?</p>
+
+      <ol type="A">
+        <li>Removing every bias from the network.</li>
+        <li>Adding nonlinear activation functions between linear transformations.</li>
+        <li>Using only one neuron for every problem.</li>
+        <li>Setting all weights permanently to zero.</li>
+      </ol>
+
+      <details>
+        <summary>Show answer and explanation</summary>
+        <p class="answer">
+          <strong>Answer: B.</strong> Nonlinear activations allow the
+          composition of layers to represent nonlinear relationships.
+          Additional linear layers alone can still collapse into one linear
+          transformation.
+        </p>
+      </details>
     </section>
 
     <section id="forward-pass">
-      <h2>3. Forward pass and layer calculations</h2>
+      <h2>3. Forward pass through a neural network</h2>
+
+      <h3>3.1 What happens during a forward pass?</h3>
+
       <p>
-        A forward pass calculates a network's output for a given input. Each
-        layer takes the previous layer's activations, calculates a weighted
-        sum, adds a bias and applies an activation function.
-      </p>
-      <div class="eq">
-        \[
-          z^{(l)}=W^{(l)}h^{(l-1)}+b^{(l)}
-        \]
-        \[
-          h^{(l)}=\phi(z^{(l)})
-        \]
-      </div>
-      <p>
-        \(W^{(l)}\) is the weight matrix, \(b^{(l)}\) is the bias vector,
-        \(h^{(l-1)}\) is the previous layer's output and \(\phi\) is the
-        activation function.
+        The forward pass takes input data and passes it through the network
+        layer by layer. Each layer performs a weighted sum, adds a bias,
+        and may apply an activation function.
       </p>
 
-      <h3>Worked example: one neuron</h3>
-      <p>
-        Suppose \(x_1=2\), \(x_2=1\), \(w_1=0.5\), \(w_2=-1\), and \(b=0.2\).
-      </p>
-      <div class="eq">
-        \[
-          z=(0.5)(2)+(-1)(1)+0.2=0.2
-        \]
-      </div>
-      <p>
-        With ReLU, the output is \(\max(0,0.2)=0.2\). With sigmoid, the
-        output is \(\sigma(0.2)\), approximately 0.55.
+      <p class="eq">
+        \(z=Wx+b\)
       </p>
 
-      <h3>Dimensions matter</h3>
-      <p>
-        If a batch has \(B\) examples and each example has \(d\) features,
-        its input shape is commonly \((B,d)\). A fully connected layer with
-        \(m\) output neurons typically produces shape \((B,m)\).
+      <p class="eq">
+        \(a=f(z)\)
       </p>
+
+      <p>Here:</p>
+
+      <ul>
+        <li>\(x\) is the input vector.</li>
+        <li>\(W\) is the weight matrix.</li>
+        <li>\(b\) is the bias vector.</li>
+        <li>\(z\) is the result before activation.</li>
+        <li>\(f\) is the activation function.</li>
+        <li>\(a\) is the activation or output of that layer.</li>
+      </ul>
+
+      <h3>3.2 Calculating one neuron by hand</h3>
+
+      <p>Suppose a neuron receives two inputs:</p>
+
+      <p class="eq">
+        \(x_1=2,\quad x_2=3\)
+      </p>
+
+      <p>Its weights and bias are:</p>
+
+      <p class="eq">
+        \(w_1=0.5,\quad w_2=-1,\quad b=1\)
+      </p>
+
+      <p>First calculate the weighted sum:</p>
+
+      <p class="eq">
+        \(z=w_1x_1+w_2x_2+b\)
+      </p>
+
+      <p class="eq">
+        \(z=(0.5)(2)+(-1)(3)+1=-1\)
+      </p>
+
+      <p>With ReLU activation:</p>
+
+      <p class="eq">
+        \(a=\max(0,-1)=0\)
+      </p>
+
+      <p>
+        The neuron's output is therefore zero. Notice that the bias is
+        included before the activation function.
+      </p>
+
+      <h3>3.3 Forward pass through two layers</h3>
+
+      <p>
+        Suppose a network has one input, two hidden neurons, and one output
+        neuron. Use the following parameters:
+      </p>
+
+      <ul>
+        <li>Input: \(x=2\)</li>
+        <li>Hidden weights: \(w_1=1,\ w_2=-1\)</li>
+        <li>Hidden biases: \(b_1=0,\ b_2=1\)</li>
+        <li>Hidden activation: ReLU</li>
+        <li>Output weights: \(v_1=2,\ v_2=3\)</li>
+        <li>Output bias: \(c=1\)</li>
+      </ul>
+
+      <p>First hidden neuron:</p>
+      <p class="eq">\(z_1=(1)(2)+0=2\)</p>
+      <p class="eq">\(h_1=\operatorname{ReLU}(2)=2\)</p>
+
+      <p>Second hidden neuron:</p>
+      <p class="eq">\(z_2=(-1)(2)+1=-1\)</p>
+      <p class="eq">\(h_2=\operatorname{ReLU}(-1)=0\)</p>
+
+      <p>Output neuron, assuming a linear output:</p>
+      <p class="eq">\(y=(2)(h_1)+(3)(h_2)+1\)</p>
+      <p class="eq">\(y=(2)(2)+(3)(0)+1=5\)</p>
+
+      <p>
+        The final output is 5. If the output layer instead used a sigmoid,
+        the value before sigmoid would still be 5, but the final output
+        would be \(\sigma(5)\), approximately 0.993.
+      </p>
+
+      <h3>3.4 Matrix form</h3>
+
+      <p>
+        When a layer has many neurons, matrix multiplication performs all
+        weighted sums efficiently.
+      </p>
+
+      <p class="eq">
+        \(z=Wx+b\)
+      </p>
+
+      <p>
+        If the input has 4 features and the layer has 3 neurons, then
+        \(x\) has shape \((4,)\), \(W\) can have shape \((3,4)\), and
+        \(b\) has shape \((3,)\). The resulting \(z\) has shape \((3,)\).
+      </p>
+
+      <p>
+        With a batch of 8 examples, the input often has shape \((8,4)\).
+        In PyTorch, a linear layer with 4 input features and 3 output
+        features uses weights of shape \((3,4)\) and produces an output
+        of shape \((8,3)\).
+      </p>
+
+      <h3>3.5 A forward pass in PyTorch</h3>
+
       <pre><code>import torch
-from torch import nn
+import torch.nn as nn
 
-x = torch.randn(32, 10)   # 32 examples, 10 features each
-layer = nn.Linear(10, 4)
-output = layer(x)
+model = nn.Sequential(
+    nn.Linear(4, 8),
+    nn.ReLU(),
+    nn.Linear(8, 3)
+)
 
-print(output.shape)       # torch.Size([32, 4])</code></pre>
+x = torch.randn(5, 4)
+output = model(x)
+
+print(output.shape)  # torch.Size([5, 3])</code></pre>
+
       <p>
-        Always check the dimensions when tracing a network. The number of
-        input features to a layer must match the layer's expected input size.
+        Here, the model receives five examples, each containing four
+        features, and produces three output values per example.
       </p>
+
+      <div class="note">
+        <strong>Exam tip:</strong> For a forward-pass numerical question,
+        calculate one layer at a time. Do not apply the next layer until
+        you have calculated the previous layer's activation.
+      </div>
+
+      <h3>Original GA-style example</h3>
+
+      <p><strong>Question:</strong> A neuron has inputs \(x_1=3,\ x_2=2\), weights \(w_1=2,\ w_2=-1\), bias \(b=-2\), and ReLU activation. What is its output?</p>
+
+      <ol type="A">
+        <li>-2</li>
+        <li>0</li>
+        <li>2</li>
+        <li>4</li>
+      </ol>
+
+      <details>
+        <summary>Show calculation</summary>
+        <p class="answer">
+          \(z=2(3)+(-1)(2)-2=2\). Applying ReLU gives
+          \(\max(0,2)=2\). <strong>Answer: C.</strong>
+        </p>
+      </details>
     </section>
 
-    <section id="losses">
-      <h2>4. Loss functions: measuring prediction error</h2>
+    <section id="loss">
+      <h2>4. Loss functions</h2>
+
+      <h3>4.1 What is a loss function?</h3>
+
       <p>
-        A loss function converts predictions and targets into a numerical
-        value that the training algorithm attempts to reduce. The suitable
-        loss depends on the task and the format of the model output.
+        A loss function measures how different a model's prediction is from
+        the target. Training uses the loss to determine whether parameter
+        updates are improving the model.
       </p>
 
-      <h3>Mean squared error (MSE)</h3>
-      <div class="eq">
-        \[
-          \operatorname{MSE}=
-          \frac{1}{N}\sum_{i=1}^{N}(y_i-\hat{y}_i)^2
-        \]
-      </div>
       <p>
-        MSE is commonly used for regression. It averages squared differences
-        between numerical targets and predictions.
-      </p>
-      <p>
-        Example: actual values are [10, 20] and predictions are [8, 18].
-        The squared errors are 4 and 4, so the MSE is \((4+4)/2=4\).
+        A loss is a numerical value. A smaller loss usually indicates
+        predictions that better match the targets according to that
+        particular loss function. The best loss depends on the task.
       </p>
 
-      <h3>Binary cross-entropy (BCE)</h3>
-      <div class="eq">
-        \[
-          L=-[y\log(p)+(1-y)\log(1-p)]
-        \]
-      </div>
+      <h3>4.2 Mean Squared Error (MSE)</h3>
+
       <p>
-        BCE is commonly used for binary classification, where the target is
-        0 or 1 and the model represents the probability of the positive class
-        as \(p\). Confident incorrect predictions are penalized strongly.
+        Mean Squared Error is commonly used for regression, where the goal
+        is to predict a numerical value.
       </p>
 
-      <h3>Categorical cross-entropy</h3>
-      <p>
-        Categorical cross-entropy is used for multiclass classification.
-        In a common setup, the model produces one score (logit) per class,
-        and the target identifies the correct class.
+      <p class="eq">
+        \(\operatorname{MSE}=\frac{1}{N}\sum_{i=1}^{N}(y_i-\hat y_i)^2\)
       </p>
-      <div class="eq">
-        \[
-          \operatorname{softmax}(z_i)=
-          \frac{e^{z_i}}{\sum_j e^{z_j}}
-        \]
-      </div>
+
       <p>
-        Softmax converts class logits into values that sum to one and can be
-        interpreted as class probabilities. In PyTorch, when using
-        <code>nn.CrossEntropyLoss</code>, pass raw logits and integer class
-        labels; do not apply softmax before the loss.
+        The error for each example is squared, and the squared errors are
+        averaged. Squaring makes large errors contribute more heavily.
       </p>
+
+      <h4>Worked example</h4>
+
+      <p>Suppose the targets are \([3,5]\) and predictions are \([2,7]\).</p>
+
+      <p class="eq">
+        \(\operatorname{MSE}=\frac{(3-2)^2+(5-7)^2}{2}\)
+      </p>
+
+      <p class="eq">
+        \(=\frac{1+4}{2}=2.5\)
+      </p>
+
+      <p>The MSE is 2.5.</p>
+
+      <pre><code>criterion = nn.MSELoss()
+loss = criterion(predictions, targets)</code></pre>
+
+      <h3>4.3 Binary cross-entropy (BCE)</h3>
+
+      <p>
+        Binary cross-entropy is used for binary classification, such as
+        predicting whether a customer will leave a service.
+      </p>
+
+      <p>
+        Let \(y\) be the binary target and \(p\) be the predicted probability
+        of class 1. The binary cross-entropy for one example is:
+      </p>
+
+      <p class="eq">
+        \(-[y\log(p)+(1-y)\log(1-p)]\)
+      </p>
+
+      <p>
+        If the target is 1, the expression reduces to \(-\log(p)\).
+        Predicting a probability close to 1 gives a small loss; predicting
+        a probability close to 0 gives a large loss.
+      </p>
+
+      <p>
+        If the target is 0, the expression reduces to \(-\log(1-p)\).
+        The loss is small when the predicted probability is close to 0.
+      </p>
+
+      <pre><code># Model returns logits (not sigmoid probabilities)
+criterion = nn.BCEWithLogitsLoss()
+logits = model(x)
+loss = criterion(logits, targets.float())</code></pre>
+
+      <p>
+        <code>BCEWithLogitsLoss</code> combines sigmoid and binary
+        cross-entropy in a numerically stable operation. When using this
+        loss, the model should normally return logits rather than applying
+        a sigmoid inside the model.
+      </p>
+
+      <h3>4.4 Categorical cross-entropy</h3>
+
+      <p>
+        For a mutually exclusive multiclass classification task, such as
+        classifying an image into one of ten categories, a common choice is
+        categorical cross-entropy.
+      </p>
+
+      <p class="eq">
+        \(L=-\sum_{k=1}^{C}y_k\log(p_k)\)
+      </p>
+
+      <p>
+        Here \(C\) is the number of classes, \(y_k\) is the target
+        indicator for class \(k\), and \(p_k\) is the predicted probability
+        for that class. With one-hot targets, only the correct class
+        contributes to the sum.
+      </p>
+
+      <p>
+        In PyTorch, <code>nn.CrossEntropyLoss</code> normally receives
+        unnormalized class scores called logits. It combines the
+        log-softmax operation and negative log-likelihood loss.
+      </p>
+
+      <pre><code>criterion = nn.CrossEntropyLoss()
+logits = model(images)  # [batch_size, number_of_classes]
+loss = criterion(logits, labels)  # integer class indices</code></pre>
+
+      <p>
+        For a batch of images with 10 possible classes, the logits generally
+        have shape \((B,10)\), while the class-index labels generally have
+        shape \((B,)\).
+      </p>
+
+      <h3>4.5 Which loss should you choose?</h3>
 
       <table>
-        <thead><tr><th>Task</th><th>Common loss</th><th>Typical output</th></tr></thead>
+        <thead>
+          <tr><th>Task</th><th>Typical loss</th><th>Common target format</th></tr>
+        </thead>
         <tbody>
-          <tr><td>Regression</td><td>MSE</td><td>Numerical prediction</td></tr>
-          <tr><td>Binary classification</td><td>Binary cross-entropy</td><td>One probability for the positive class</td></tr>
-          <tr><td>Multiclass classification</td><td>Categorical cross-entropy</td><td>One score per class</td></tr>
+          <tr><td>Regression</td><td>MSE</td><td>Numerical values</td></tr>
+          <tr><td>Binary classification</td><td>BCE or BCE with logits</td><td>0/1 values</td></tr>
+          <tr><td>Single-label multiclass classification</td><td>Cross-entropy</td><td>Integer class indices</td></tr>
         </tbody>
       </table>
+
       <div class="note">
-        The loss is the objective used for learning. Accuracy is a metric
-        that describes how often predictions match class labels; loss and
-        accuracy measure different things.
+        <strong>Common mistake:</strong> Do not confuse the final predicted
+        class with the values passed to a loss function. For
+        <code>CrossEntropyLoss</code>, pass logits, not argmax class indices
+        or already-softmaxed probabilities.
       </div>
+
+      <h3>Original GA-style example</h3>
+
+      <p><strong>Question:</strong> A neural network predicts the category of each image among ten mutually exclusive categories. Which loss is a standard choice?</p>
+
+      <ol type="A">
+        <li>Mean Squared Error in every case</li>
+        <li>Binary cross-entropy for ten independent binary labels in every case</li>
+        <li>Cross-entropy for single-label multiclass classification</li>
+        <li>No loss function is needed</li>
+      </ol>
+
+      <details>
+        <summary>Show answer</summary>
+        <p class="answer">
+          <strong>Answer: C.</strong> For one correct class among ten
+          mutually exclusive classes, <code>nn.CrossEntropyLoss</code> is
+          a standard choice.
+        </p>
+      </details>
     </section>
 
     <section id="gradient-descent">
-      <h2>5. Gradient descent and learning rate</h2>
+      <h2>5. Gradient descent</h2>
+
+      <h3>5.1 What is a gradient?</h3>
+
       <p>
-        Training aims to find parameter values that produce low loss.
-        Gradient descent uses the loss gradient to choose a parameter update.
-      </p>
-      <div class="eq">
-        \[
-          \theta_{\text{new}}=
-          \theta_{\text{old}}-\eta\nabla_\theta L
-        \]
-      </div>
-      <p>
-        Here, \(\theta\) represents the model parameters, \(L\) is the loss,
-        \(\nabla_\theta L\) is the gradient and \(\eta\) is the learning rate.
+        A gradient describes how a function changes with respect to its
+        input parameters. For a model with many parameters, the gradient
+        contains a derivative for every parameter.
       </p>
 
-      <h3>Numerical example</h3>
       <p>
-        Suppose the current parameter is 2.0, its gradient is 0.5 and the
-        learning rate is 0.1.
-      </p>
-      <div class="eq">
-        \[
-          \theta_{\text{new}}=2.0-(0.1)(0.5)=1.95
-        \]
-      </div>
-      <p>
-        If the gradient were negative, subtracting it would increase the
-        parameter under this update rule.
+        If the loss is \(L\) and a parameter is \(w\), then
+        \(\frac{\partial L}{\partial w}\) describes the local rate of
+        change in loss as \(w\) changes.
       </p>
 
-      <h3>What does the learning rate do?</h3>
       <ul>
-        <li><strong>Too high:</strong> updates may overshoot useful values or make training unstable.</li>
-        <li><strong>Too low:</strong> training may progress very slowly.</li>
-        <li><strong>Reasonable value:</strong> allows useful progress while keeping updates manageable.</li>
+        <li>A positive gradient means increasing the parameter slightly would increase the loss locally.</li>
+        <li>A negative gradient means increasing the parameter slightly would decrease the loss locally.</li>
+        <li>A gradient close to zero means the loss changes very little locally in that direction.</li>
       </ul>
 
-      <h3>Batch gradient descent, SGD and mini-batches</h3>
+      <h3>5.2 The gradient descent update rule</h3>
+
+      <p class="eq">
+        \(w_{\text{new}}=w_{\text{old}}-\eta\frac{\partial L}{\partial w}\)
+      </p>
+
+      <p>Here:</p>
+
       <ul>
-        <li><strong>Batch gradient descent:</strong> uses the full training dataset for a gradient update.</li>
-        <li><strong>Stochastic gradient descent (SGD):</strong> uses one example for an update in its strict definition.</li>
-        <li><strong>Mini-batch gradient descent:</strong> uses a small batch of examples for each update.</li>
+        <li>\(w_{\text{old}}\) is the current parameter.</li>
+        <li>\(\eta\) is the learning rate.</li>
+        <li>\(\frac{\partial L}{\partial w}\) is the gradient of the loss with respect to the parameter.</li>
       </ul>
-      <p>
-        Mini-batches are common in deep learning because they offer an
-        effective balance between computation and frequent parameter updates.
-        In many software libraries, an SGD optimizer is used with mini-batches.
-      </p>
-    </section>
 
-    <section id="backpropagation">
-      <h2>6. Backpropagation and the chain rule</h2>
       <p>
-        Backpropagation calculates how the loss changes with respect to the
-        model's parameters. It uses the chain rule to propagate derivatives
-        backward from the output through the computations that produced it.
-      </p>
-      <h3>The chain rule</h3>
-      <p>If \(y=f(u)\) and \(u=g(x)\), then:</p>
-      <div class="eq">
-        \[
-          \frac{dy}{dx}=
-          \frac{dy}{du}\frac{du}{dx}
-        \]
-      </div>
-      <p>
-        For a longer chain of operations, multiply the local derivatives along
-        the path. This is the central idea behind calculating gradients in a
-        multilayer network.
+        The minus sign means the update moves in the direction opposite
+        to the gradient, which is the local direction of steepest decrease
+        for a differentiable loss.
       </p>
 
-      <h3>Simple scalar example</h3>
-      <p>Let \(u=2x\), \(y=u^2\), and suppose \(x=3\).</p>
-      <div class="eq">
-        \[
-          u=2(3)=6,\qquad y=6^2=36
-        \]
-        \[
-          \frac{du}{dx}=2,\qquad \frac{dy}{du}=2u=12
-        \]
-        \[
-          \frac{dy}{dx}=\frac{dy}{du}\frac{du}{dx}=12(2)=24
-        \]
-      </div>
-      <p>
-        The derivative tells us how sensitive the final value is to a small
-        change in the original input at that point.
+      <h3>5.3 Numerical example</h3>
+
+      <p>Suppose:</p>
+
+      <p class="eq">
+        \(w_{\text{old}}=2,\quad \eta=0.1,\quad
+        \frac{\partial L}{\partial w}=4\)
       </p>
 
-      <h3>Backpropagation in a neural network</h3>
-      <ol>
-        <li>Run the forward pass and calculate the loss.</li>
-        <li>Calculate the loss derivative with respect to the output.</li>
-        <li>Use the chain rule to calculate derivatives for earlier layers.</li>
-        <li>Continue until gradients for the trainable parameters are obtained.</li>
-        <li>Let the optimizer use these gradients to update the parameters.</li>
-      </ol>
-      <p>
-        Backpropagation calculates gradients; it does not itself perform the
-        optimizer's parameter update. The distinction is important when
-        reading code or tracing a numerical example.
+      <p>Then:</p>
+
+      <p class="eq">
+        \(w_{\text{new}}=2-(0.1)(4)=1.6\)
       </p>
 
-      <h3>Typical PyTorch training step</h3>
-      <pre><code>optimizer.zero_grad()  # clear old gradients
-outputs = model(inputs)  # forward pass
-loss = criterion(outputs, targets)
-loss.backward()        # calculate gradients
-optimizer.step()       # update parameters</code></pre>
-    </section>
-
-    <section id="xor">
-      <h2>7. XOR: why a hidden layer matters</h2>
       <p>
-        XOR outputs 1 when its two binary inputs are different and 0 when they
-        are the same.
+        The updated weight is 1.6. The positive gradient causes the
+        parameter to decrease in this step.
       </p>
+
+      <h3>5.4 What happens when the learning rate changes?</h3>
+
       <table>
-        <thead><tr><th>Input \(x_1\)</th><th>Input \(x_2\)</th><th>XOR output</th></tr></thead>
+        <thead>
+          <tr><th>Learning rate</th><th>Possible effect</th></tr>
+        </thead>
         <tbody>
-          <tr><td>0</td><td>0</td><td>0</td></tr>
-          <tr><td>0</td><td>1</td><td>1</td></tr>
-          <tr><td>1</td><td>0</td><td>1</td></tr>
-          <tr><td>1</td><td>1</td><td>0</td></tr>
+          <tr><td>Too small</td><td>Training may progress very slowly.</td></tr>
+          <tr><td>Reasonable</td><td>Updates may make useful progress toward lower loss.</td></tr>
+          <tr><td>Too large</td><td>Updates may overshoot, oscillate, or diverge.</td></tr>
         </tbody>
       </table>
+
       <p>
-        A single linear classifier creates one linear decision boundary.
-        The XOR positives (0,1) and (1,0) cannot be separated from the
-        negatives (0,0) and (1,1) using one straight line.
+        A larger learning rate does not automatically mean a better model.
+        The best value depends on the model, data, loss surface, and
+        optimizer.
       </p>
+
+      <h3>5.5 Batch, stochastic, and mini-batch gradient descent</h3>
+
+      <table>
+        <thead>
+          <tr><th>Method</th><th>How examples are used</th><th>Practical characteristic</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Batch gradient descent</td>
+            <td>Uses the entire training dataset for one gradient calculation.</td>
+            <td>Can be expensive for large datasets.</td>
+          </tr>
+          <tr>
+            <td>Stochastic gradient descent</td>
+            <td>Uses one example per update.</td>
+            <td>Frequent, noisy updates.</td>
+          </tr>
+          <tr>
+            <td>Mini-batch gradient descent</td>
+            <td>Uses a small batch of examples per update.</td>
+            <td>Common in deep learning; balances computational efficiency and update frequency.</td>
+          </tr>
+        </tbody>
+      </table>
+
       <p>
-        A network with a hidden layer and nonlinear activations can combine
-        intermediate features to represent XOR. The hidden layer transforms
-        the original inputs into a representation in which the final output
-        can distinguish the classes.
+        If a dataset contains 1,000 examples and the batch size is 100,
+        one epoch normally consists of 10 mini-batches, assuming all
+        examples are used and the last batch is full.
       </p>
+
+      <h3>5.6 Optimizers in PyTorch</h3>
+
+      <pre><code>optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
+
+optimizer.zero_grad()  # Clear previous gradients
+predictions = model(x)  # Forward pass
+loss = criterion(predictions, targets)
+loss.backward()  # Calculate gradients
+optimizer.step()  # Update parameters</code></pre>
+
+      <p>
+        PyTorch optimizers implement the parameter update rules. SGD is
+        a common gradient-based optimizer; Adam is another widely used
+        optimizer that adapts updates using running estimates of gradients
+        and squared gradients.
+      </p>
+
       <div class="note">
-        <strong>Exam idea:</strong> if asked why one perceptron cannot solve
-        XOR, explain that XOR is not linearly separable. Adding hidden units
-        and nonlinear activation functions gives the network greater
-        representational power.
+        <strong>Order matters:</strong> Calculate the loss, call
+        <code>backward()</code> to compute gradients, and then call
+        <code>step()</code> to update the parameters. Clear old gradients
+        before accumulating the next batch's gradients.
       </div>
+
+      <h3>Original GA-style example</h3>
+
+      <p><strong>Question:</strong> A weight is 0.8, the learning rate is 0.05, and its gradient is -2. What is the new weight after one standard gradient descent update?</p>
+
+      <details>
+        <summary>Show calculation</summary>
+        <p class="answer">
+          \(w_{\text{new}}=0.8-(0.05)(-2)=0.8+0.1=0.9\).
+          <strong>Answer: 0.9.</strong>
+        </p>
+      </details>
     </section>
 
     <section id="churn">
-      <h2>8. Customer churn classification</h2>
+      <h2>6. Customer churn prediction with a neural network</h2>
+
+      <h3>6.1 What is customer churn?</h3>
+
       <p>
-        Customer churn prediction is a binary classification problem. The
-        goal is to predict whether a customer will leave a service, using
-        information such as account details, usage, tenure or service history.
-        The exact features depend on the dataset.
+        Customer churn occurs when a customer stops using a service or
+        leaves a business. A churn prediction model estimates the likelihood
+        that a customer will leave, based on information such as usage,
+        tenure, subscription type, and billing information.
       </p>
-      <h3>Typical workflow</h3>
+
+      <p>
+        If the target indicates whether a customer churned, the task is
+        typically a binary classification problem.
+      </p>
+
+      <h3>6.2 Understand the dataset</h3>
+
+      <p>A tabular churn dataset may contain:</p>
+
+      <ul>
+        <li>Numerical features: tenure, monthly charges, number of support calls.</li>
+        <li>Categorical features: contract type, payment method, service plan.</li>
+        <li>Target: whether the customer churned, often encoded as 0 or 1.</li>
+      </ul>
+
+      <p>
+        The exact columns and preprocessing steps depend on the dataset
+        used in the lecture. The following is a general workflow, not a
+        claim about a particular course dataset.
+      </p>
+
+      <h3>6.3 Data preprocessing</h3>
+
       <ol>
-        <li>Load and inspect the dataset.</li>
-        <li>Identify the target column and input features.</li>
-        <li>Check missing values, duplicates, data types and target labels.</li>
-        <li>Separate the input features from the target.</li>
-        <li>Split the data into training and validation/test sets.</li>
-        <li>Encode categorical features into a numerical representation.</li>
+        <li>Load the dataset and inspect its columns, data types, and missing values.</li>
+        <li>Separate input features from the target.</li>
+        <li>Encode categorical features into numerical representations.</li>
+        <li>Handle missing values according to a consistent policy.</li>
         <li>Scale numerical features when appropriate.</li>
-        <li>Build a neural network and choose a suitable loss.</li>
-        <li>Train on training data and monitor validation performance.</li>
+        <li>Split the data into training and validation sets.</li>
+        <li>Convert processed features and targets to suitable tensor types.</li>
       </ol>
 
-      <h3>Preprocessing without data leakage</h3>
       <p>
-        Fit preprocessing steps, such as a scaler, using only the training
-        data. Then apply the fitted transformation to validation and test data.
-        If validation/test statistics are used to fit the preprocessing,
-        information from those sets leaks into the training process.
+        A neural network operates on numerical tensors. Text categories
+        such as "monthly" and "annual" cannot be passed directly into an
+        ordinary linear layer without encoding.
       </p>
 
-      <h3>Example binary classifier with PyTorch</h3>
-      <pre><code>import torch
-from torch import nn
+      <h3>6.4 Why feature scaling can help</h3>
 
-class ChurnMLP(nn.Module):
-    def __init__(self, input_features):
+      <p>
+        Suppose one feature represents customer tenure between 0 and 10,
+        while another represents annual charges between 0 and 100,000.
+        Their numerical scales differ considerably.
+      </p>
+
+      <p>
+        Scaling can make optimization easier by preventing some numerical
+        features from dominating simply because of their units. A common
+        standardization is:
+      </p>
+
+      <p class="eq">
+        \(x_{\text{scaled}}=\frac{x-\mu}{\sigma}\)
+      </p>
+
+      <p>
+        Estimate scaling statistics from the training data and apply those
+        same statistics to the validation data. Using validation data to
+        fit preprocessing parameters can leak information into model
+        development.
+      </p>
+
+      <h3>6.5 Package imports</h3>
+
+      <pre><code>import numpy as np
+import pandas as pd
+import torch
+import torch.nn as nn
+from torch.utils.data import DataLoader, TensorDataset
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler</code></pre>
+
+      <p>
+        These packages support data manipulation, tensor operations,
+        neural network construction, mini-batch loading, dataset splitting,
+        and feature scaling. Exact imports depend on the implementation.
+      </p>
+
+      <h3>6.6 Define a neural network</h3>
+
+      <p>
+        Suppose the processed dataset contains \(d\) input features.
+        A simple model can map those features to a hidden representation
+        and then produce one output logit.
+      </p>
+
+      <pre><code>class ChurnMLP(nn.Module):
+    def __init__(self, input_dim):
         super().__init__()
+
         self.network = nn.Sequential(
-            nn.Linear(input_features, 32),
+            nn.Linear(input_dim, 32),
             nn.ReLU(),
             nn.Linear(32, 16),
             nn.ReLU(),
@@ -434,423 +873,1823 @@ class ChurnMLP(nn.Module):
         )
 
     def forward(self, x):
-        return self.network(x)
+        return self.network(x)</code></pre>
 
-model = ChurnMLP(input_features=10)
+      <p>
+        The hidden layers learn intermediate combinations of the input
+        features. The final layer produces one logit for each example.
+        A sigmoid can convert that logit into a probability when needed.
+      </p>
 
-# Output is one logit per example.
-# BCEWithLogitsLoss combines sigmoid and binary cross-entropy.
-criterion = nn.BCEWithLogitsLoss()</code></pre>
+      <h3>6.7 Weight initialization</h3>
+
       <p>
-        The example assumes the inputs have already been converted into
-        suitable numerical features. Replace 10 with the actual number of
-        features after preprocessing. For binary classification with
-        <code>BCEWithLogitsLoss</code>, provide raw logits and compatible
-        floating-point targets; do not apply sigmoid before the loss.
+        Training typically starts with initialized weights and biases.
+        If every neuron in the same layer begins with identical weights,
+        the neurons can receive identical gradients and fail to learn
+        different features.
       </p>
+
       <p>
-        The final prediction can be formed by applying sigmoid to the logits
-        and comparing the resulting probability with a chosen threshold.
-        A threshold of 0.5 is common, but the best threshold depends on the
-        task and the costs of different errors.
+        Randomized initialization helps break this symmetry. The
+        initialization method should also be appropriate for the
+        activation function and network architecture.
       </p>
+
+      <ul>
+        <li><strong>Xavier/Glorot initialization:</strong> Often used with activations such as tanh, with variants depending on the layer.</li>
+        <li><strong>Kaiming/He initialization:</strong> Designed with ReLU-like activations in mind.</li>
+        <li><strong>Bias initialization:</strong> Often begins at zero, although some models use other choices.</li>
+      </ul>
+
+      <pre><code>model = ChurnMLP(input_dim)
+
+for layer in model.modules():
+    if isinstance(layer, nn.Linear):
+        nn.init.kaiming_uniform_(
+            layer.weight,
+            nonlinearity="relu"
+        )
+        nn.init.zeros_(layer.bias)</code></pre>
+
+      <p>
+        This example applies Kaiming initialization to all linear layers.
+        For a final output layer, other initialization choices may also
+        be appropriate. Initialization is not the same as the later
+        gradient-based learning process.
+      </p>
+
+      <h3>6.8 Training and validation setup</h3>
+
+      <p>
+        The training set is used to calculate gradients and update
+        parameters. The validation set is used to monitor how well the
+        current model performs on held-out examples.
+      </p>
+
+      <pre><code>train_dataset = TensorDataset(X_train, y_train)
+val_dataset = TensorDataset(X_val, y_val)
+
+train_loader = DataLoader(
+    train_dataset,
+    batch_size=64,
+    shuffle=True
+)
+
+val_loader = DataLoader(
+    val_dataset,
+    batch_size=64,
+    shuffle=False
+)</code></pre>
+
+      <p>
+        Shuffling the training examples helps avoid relying on a fixed
+        order of examples. Validation data is usually not shuffled because
+        its order does not need to be randomized for evaluation.
+      </p>
+
+      <h3>6.9 Training loop</h3>
+
+      <pre><code>model = ChurnMLP(X_train.shape[1])
+criterion = nn.BCEWithLogitsLoss()
+optimizer = torch.optim.Adam(
+    model.parameters(),
+    lr=0.001
+)
+
+for epoch in range(20):
+    model.train()
+    total_loss = 0.0
+
+    for features, targets in train_loader:
+        targets = targets.float().view(-1, 1)
+
+        optimizer.zero_grad()
+
+        logits = model(features)
+        loss = criterion(logits, targets)
+
+        loss.backward()
+        optimizer.step()
+
+        total_loss += loss.item() * features.size(0)
+
+    average_loss = total_loss / len(train_loader.dataset)
+    print(f"Epoch {epoch + 1}: loss = {average_loss:.4f}")</code></pre>
+
+      <p>
+        This example assumes that the feature tensors and target tensors
+        have already been prepared with compatible shapes and types.
+        The targets are converted to floating-point values with shape
+        \((B,1)\) to match the output logits.
+      </p>
+
+      <h3>6.10 Model training versus validation</h3>
+
+      <p>
+        The model should be put into training mode during training and
+        evaluation mode during validation. These modes affect layers such
+        as dropout and batch normalization when present.
+      </p>
+
+      <pre><code>model.train()  # Training mode
+# Forward pass, loss, backward pass, optimizer update
+
+model.eval()   # Evaluation mode
+with torch.no_grad():
+    # Forward pass and evaluation only
+    pass</code></pre>
+
+      <p>
+        <code>model.eval()</code> does not disable gradients by itself.
+        <code>torch.no_grad()</code> prevents gradient tracking in the
+        enclosed computation. These are separate operations.
+      </p>
+
+      <h3>6.11 Converting logits to churn predictions</h3>
+
+      <p>
+        For a binary classifier, sigmoid converts a logit \(z\) into a
+        probability:
+      </p>
+
+      <p class="eq">
+        \(p=\frac{1}{1+e^{-z}}\)
+      </p>
+
+      <p>
+        A threshold such as 0.5 can be used to produce a binary prediction:
+        classify as class 1 when \(p\geq0.5\). The threshold can be changed
+        depending on the cost of false positives and false negatives.
+      </p>
+
+      <pre><code>probabilities = torch.sigmoid(logits)
+predictions = (probabilities >= 0.5).int()</code></pre>
+
+      <div class="note">
+        <strong>GA focus:</strong> Be ready to identify preprocessing steps,
+        tensor shapes, loss-function choice, training-loop order,
+        parameter initialization, and the difference between training
+        and validation.
+      </div>
+
+      <h3>Original GA-style example</h3>
+
+      <p><strong>Question:</strong> A binary churn model returns logits of shape \((32,1)\). Its target tensor contains 32 labels encoded as 0 or 1. Which target transformation is compatible with the example training code above?</p>
+
+      <ol type="A">
+        <li>Convert the targets to floating-point values and reshape to \((32,1)\).</li>
+        <li>Convert the targets to text strings.</li>
+        <li>Convert the targets to shape \((32,10)\) without changing the model.</li>
+        <li>Apply argmax to the target labels.</li>
+      </ol>
+
+      <details>
+        <summary>Show answer</summary>
+        <p class="answer">
+          <strong>Answer: A.</strong> <code>BCEWithLogitsLoss</code> expects
+          floating-point targets compatible with the logits' shape. Here
+          both have shape \((32,1)\).
+        </p>
+      </details>
     </section>
 
-    <section id="fashion-mnist">
-      <h2>9. Fashion-MNIST classification with an MLP</h2>
+    <section id="backprop">
+      <h2>7. Backpropagation</h2>
+
+      <h3>7.1 What is backpropagation?</h3>
+
       <p>
-        Fashion-MNIST is a dataset of grayscale clothing images belonging to
-        10 classes. Each image is 28 × 28 pixels. A simple multilayer
-        perceptron can flatten each image into 784 input values and produce
-        10 output logits, one for each class.
+        Backpropagation is an efficient method for computing derivatives
+        of a loss with respect to the parameters of a neural network. It
+        applies the chain rule from the output of the network back through
+        the preceding computations.
       </p>
 
-      <h3>Load the dataset</h3>
-      <pre><code>import torch
-from torch import nn
-from torchvision import datasets, transforms
+      <p>
+        The forward pass calculates intermediate values. Backpropagation
+        uses those values to calculate gradients. An optimizer then uses
+        the gradients to update the parameters.
+      </p>
+
+      <div class="note">
+        Backpropagation calculates gradients; it does not, by itself,
+        update the weights. The optimizer performs the update.
+      </div>
+
+      <h3>7.2 The chain rule</h3>
+
+      <p>
+        If \(y=f(u)\) and \(u=g(x)\), then \(y=f(g(x))\). The chain rule
+        gives:
+      </p>
+
+      <p class="eq">
+        \(\frac{dy}{dx}=\frac{dy}{du}\frac{du}{dx}\)
+      </p>
+
+      <p>
+        The derivative of the outer function is multiplied by the
+        derivative of the inner function. This principle allows us to
+        calculate gradients through multiple connected operations.
+      </p>
+
+      <h3>7.3 Backpropagation through a simple scalar chain</h3>
+
+      <p>Consider the computation:</p>
+
+      <p class="eq">
+        \(x=2,\quad a=3x,\quad y=a^2\)
+      </p>
+
+      <p>First calculate the forward values:</p>
+
+      <p class="eq">
+        \(a=3(2)=6,\quad y=6^2=36\)
+      </p>
+
+      <p>Now calculate the derivatives:</p>
+
+      <p class="eq">
+        \(\frac{dy}{da}=2a=12\)
+      </p>
+
+      <p class="eq">
+        \(\frac{da}{dx}=3\)
+      </p>
+
+      <p>Apply the chain rule:</p>
+
+      <p class="eq">
+        \(\frac{dy}{dx}=\frac{dy}{da}\frac{da}{dx}=12(3)=36\)
+      </p>
+
+      <p>
+        The derivative of the final output with respect to \(x\) is 36.
+      </p>
+
+      <h3>7.4 A second scalar example involving loss</h3>
+
+      <p>Suppose a model predicts:</p>
+
+      <p class="eq">
+        \(\hat y=wx,\quad L=\frac{1}{2}(\hat y-y)^2\)
+      </p>
+
+      <p>
+        To calculate the gradient with respect to \(w\), apply the chain
+        rule:
+      </p>
+
+      <p class="eq">
+        \(\frac{\partial L}{\partial w}
+        =\frac{\partial L}{\partial\hat y}
+        \frac{\partial\hat y}{\partial w}\)
+      </p>
+
+      <p class="eq">
+        \(\frac{\partial L}{\partial\hat y}=\hat y-y\)
+      </p>
+
+      <p class="eq">
+        \(\frac{\partial\hat y}{\partial w}=x\)
+      </p>
+
+      <p>Therefore:</p>
+
+      <p class="eq">
+        \(\frac{\partial L}{\partial w}=(\hat y-y)x\)
+      </p>
+
+      <p>
+        If \(x=2\), \(w=3\), and \(y=4\), then \(\hat y=6\), so:
+      </p>
+
+      <p class="eq">
+        \(\frac{\partial L}{\partial w}=(6-4)(2)=4\)
+      </p>
+
+      <h3>7.5 Backpropagation through an MLP</h3>
+
+      <p>
+        A multilayer perceptron (MLP) consists of connected layers. During
+        the forward pass, each layer's output becomes the next layer's
+        input. During backpropagation, gradients flow in the reverse
+        direction.
+      </p>
+
+      <p>For a two-layer network:</p>
+
+      <p class="eq">
+        \(z_1=W_1x+b_1,\quad a_1=f(z_1)\)
+      </p>
+
+      <p class="eq">
+        \(z_2=W_2a_1+b_2,\quad \hat y=g(z_2)\)
+      </p>
+
+      <p>
+        The loss depends on \(\hat y\). Backpropagation first calculates
+        how the loss changes with respect to the output layer, then
+        propagates that information through the hidden layer.
+      </p>
+
+      <p>
+        For example, the gradient with respect to the second layer's
+        weights depends on the output-layer error and the hidden
+        activations. The gradient with respect to the first layer's
+        weights also depends on how the hidden activations affect the
+        output.
+      </p>
+
+      <h3>7.6 Activation derivatives</h3>
+
+      <p>
+        Activation functions contribute derivatives to the chain rule.
+        For ReLU, away from zero:
+      </p>
+
+      <p class="eq">
+        \(f'(z)=
+        \begin{cases}
+        0,&z&lt;0\\
+        1,&z&gt;0
+        \end{cases}\)
+      </p>
+
+      <p>
+        If a ReLU neuron has a negative pre-activation, its local
+        derivative is zero. This can block gradient flow through that
+        neuron for that input.
+      </p>
+
+      <p>
+        For sigmoid:
+      </p>
+
+      <p class="eq">
+        \(\sigma'(z)=\sigma(z)(1-\sigma(z))\)
+      </p>
+
+      <p>
+        The sigmoid derivative becomes small when its output is close
+        to 0 or 1, which can contribute to vanishing gradients in deep
+        networks.
+      </p>
+
+      <h3>7.7 Backpropagation in PyTorch</h3>
+
+      <pre><code>x = torch.tensor([2.0], requires_grad=True)
+
+a = 3 * x
+y = a ** 2
+
+y.backward()
+
+print(x.grad)  # tensor([36.])</code></pre>
+
+      <p>
+        Setting <code>requires_grad=True</code> allows PyTorch to track
+        operations involving the tensor. Calling <code>backward()</code>
+        computes the gradient of the scalar output with respect to
+        tracked inputs.
+      </p>
+
+      <p>
+        In ordinary model training, parameters already have gradient
+        tracking enabled. Their gradients can be accessed through
+        <code>parameter.grad</code> after backpropagation.
+      </p>
+
+      <h3>Original GA-style example</h3>
+
+      <p><strong>Question:</strong> Let \(u=2x\), \(y=u^3\), and \(x=2\). What is \(\frac{dy}{dx}\) at this value?</p>
+
+      <details>
+        <summary>Show calculation</summary>
+        <p class="answer">
+          By the chain rule,
+          \(\frac{dy}{dx}=\frac{dy}{du}\frac{du}{dx}=3u^2(2)\).
+          Since \(u=2(2)=4\), the derivative is
+          \(3(16)(2)=96\).
+          <strong>Answer: 96.</strong>
+        </p>
+      </details>
+    </section>
+
+    <section id="xor">
+      <h2>8. The XOR problem</h2>
+
+      <h3>8.1 What is XOR?</h3>
+
+      <p>
+        XOR stands for exclusive OR. For two binary inputs, the output is
+        1 when the inputs are different and 0 when they are the same.
+      </p>
+
+      <table>
+        <thead>
+          <tr><th>\(x_1\)</th><th>\(x_2\)</th><th>\(x_1\operatorname{XOR}x_2\)</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>0</td><td>0</td><td>0</td></tr>
+          <tr><td>0</td><td>1</td><td>1</td></tr>
+          <tr><td>1</td><td>0</td><td>1</td></tr>
+          <tr><td>1</td><td>1</td><td>0</td></tr>
+        </tbody>
+      </table>
+
+      <h3>8.2 Why is XOR a problem for a single-layer model?</h3>
+
+      <p>
+        A single neuron with a linear decision boundary cannot separate
+        the XOR examples into the correct two classes. The positive
+        examples are \((0,1)\) and \((1,0)\), while the negative examples
+        are \((0,0)\) and \((1,1)\).
+      </p>
+
+      <p>
+        No single straight line can place both positive examples on one
+        side and both negative examples on the other. XOR is therefore
+        not linearly separable.
+      </p>
+
+      <div class="note">
+        <strong>Important:</strong> The limitation concerns a single
+        linear decision boundary. A network with hidden neurons and
+        nonlinear activations can combine intermediate representations
+        to solve XOR.
+      </div>
+
+      <h3>8.3 How a hidden layer helps</h3>
+
+      <p>
+        A small network can create intermediate features that respond to
+        different input combinations. A later layer combines those
+        features to produce the XOR output.
+      </p>
+
+      <p>
+        One way to understand the idea is that hidden neurons can form
+        separate decision regions. The output neuron then combines these
+        regions. The key is that the network is no longer restricted to
+        one linear decision boundary.
+      </p>
+
+      <h3>8.4 A threshold-unit illustration</h3>
+
+      <p>
+        For conceptual understanding, define a threshold unit that returns
+        1 when its input is greater than zero and 0 otherwise.
+      </p>
+
+      <p>Consider two hidden units:</p>
+
+      <p class="eq">
+        \(h_1=\operatorname{step}(x_1+x_2-0.5)\)
+      </p>
+
+      <p class="eq">
+        \(h_2=\operatorname{step}(x_1+x_2-1.5)\)
+      </p>
+
+      <p>
+        The first unit detects whether at least one input is 1. The second
+        detects whether both inputs are 1.
+      </p>
+
+      <p>Then the XOR result can be expressed as:</p>
+
+      <p class="eq">
+        \(y=\operatorname{step}(h_1-2h_2-0.5)\)
+      </p>
+
+      <p>
+        Check the four input combinations:
+      </p>
+
+      <table>
+        <thead>
+          <tr><th>\(x_1\)</th><th>\(x_2\)</th><th>\(h_1\)</th><th>\(h_2\)</th><th>Output</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+          <tr><td>0</td><td>1</td><td>1</td><td>0</td><td>1</td></tr>
+          <tr><td>1</td><td>0</td><td>1</td><td>0</td><td>1</td></tr>
+          <tr><td>1</td><td>1</td><td>1</td><td>1</td><td>0</td></tr>
+        </tbody>
+      </table>
+
+      <p>
+        This is a threshold-unit illustration of the logic. A practical
+        neural network trained using gradient descent commonly uses
+        differentiable activations such as sigmoid or tanh instead of
+        the hard step function.
+      </p>
+
+      <h3>8.5 Forward pass and backpropagation for XOR</h3>
+
+      <p>
+        The forward pass evaluates each hidden neuron, applies its
+        activation, and then calculates the output. A loss function
+        compares the output with the correct XOR label.
+      </p>
+
+      <p>
+        Backpropagation calculates how the loss changes with respect to
+        the hidden and output weights. Gradient-based optimization
+        adjusts those parameters across training steps.
+      </p>
+
+      <p>
+        With sigmoid activations, the forward calculation for each neuron
+        follows:
+      </p>
+
+      <p class="eq">
+        \(z=Wx+b,\quad a=\sigma(z)\)
+      </p>
+
+      <p>
+        The output can then be compared with the target using a
+        classification loss. The gradients propagate through the output
+        layer and then the hidden layer.
+      </p>
+
+      <h3>Original GA-style example</h3>
+
+      <p><strong>Question:</strong> Why can a single perceptron with a linear decision boundary not correctly classify the XOR truth table?</p>
+
+      <ol type="A">
+        <li>XOR requires the input values to be floating-point tensors.</li>
+        <li>The XOR classes are not linearly separable.</li>
+        <li>Gradient descent cannot update any weight in any network.</li>
+        <li>XOR has more than ten output classes.</li>
+      </ol>
+
+      <details>
+        <summary>Show answer</summary>
+        <p class="answer">
+          <strong>Answer: B.</strong> The two positive examples cannot
+          be separated from the two negative examples by one straight
+          line. Hidden layers with nonlinear activations can solve this
+          limitation.
+        </p>
+      </details>
+    </section>
+
+    <section id="fashion-overview">
+      <h2>9. Fashion MNIST classification: overview and data processing</h2>
+
+      <h3>9.1 What is Fashion MNIST?</h3>
+
+      <p>
+        Fashion MNIST is an image classification dataset containing
+        grayscale images of fashion items. Each image is 28 by 28 pixels
+        and belongs to one of ten classes.
+      </p>
+
+      <p>The ten classes are:</p>
+
+      <ol>
+        <li>T-shirt/top</li>
+        <li>Trouser</li>
+        <li>Pullover</li>
+        <li>Dress</li>
+        <li>Coat</li>
+        <li>Sandal</li>
+        <li>Shirt</li>
+        <li>Sneaker</li>
+        <li>Bag</li>
+        <li>Ankle boot</li>
+      </ol>
+
+      <p>
+        Unlike customer churn prediction, which usually uses tabular
+        features, Fashion MNIST uses image pixels as input features.
+      </p>
+
+      <h3>9.2 Image representation</h3>
+
+      <p>
+        A grayscale image contains 28 × 28 = 784 pixel values. A simple
+        MLP can flatten these pixel values into a vector of length 784.
+      </p>
+
+      <p class="eq">
+        \(28\times28=784\)
+      </p>
+
+      <p>
+        When using a batch of \(B\) images, the original image tensor
+        typically has shape \((B,1,28,28)\), where the second dimension
+        is the number of channels.
+      </p>
+
+      <p>
+        After flattening, the shape becomes \((B,784)\). Flattening
+        changes the shape, not the number of pixel values in each image.
+      </p>
+
+      <h3>9.3 Download and transform the dataset</h3>
+
+      <pre><code>from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
 
 transform = transforms.ToTensor()
 
-train_data = datasets.FashionMNIST(
-    root="data",
+train_dataset = datasets.FashionMNIST(
+    root="./data",
     train=True,
     download=True,
     transform=transform
 )
 
-test_data = datasets.FashionMNIST(
-    root="data",
+test_dataset = datasets.FashionMNIST(
+    root="./data",
     train=False,
     download=True,
     transform=transform
 )
 
 train_loader = DataLoader(
-    train_data,
+    train_dataset,
     batch_size=64,
     shuffle=True
 )
 
 test_loader = DataLoader(
-    test_data,
+    test_dataset,
     batch_size=64,
     shuffle=False
 )</code></pre>
+
       <p>
-        <code>ToTensor()</code> converts each image into a tensor. The
-        DataLoader groups examples into batches. Shuffling the training data
-        changes the order of examples between epochs; the test loader is
-        commonly kept unshuffled for predictable evaluation.
+        <code>transforms.ToTensor()</code> converts a supported image
+        into a tensor and scales its pixel values to the range [0, 1].
+        The precise preprocessing pipeline may vary depending on the
+        course implementation.
       </p>
 
-      <h3>Build the MLP</h3>
-      <pre><code>class FashionMLP(nn.Module):
+      <h3>9.4 Training, validation, and test sets</h3>
+
+      <ul>
+        <li><strong>Training set:</strong> Used to learn model parameters.</li>
+        <li><strong>Validation set:</strong> Used to monitor performance and guide model selection or hyperparameter tuning.</li>
+        <li><strong>Test set:</strong> Used for a final evaluation after model choices have been made.</li>
+      </ul>
+
+      <p>
+        In a general workflow, part of the training data may be reserved
+        for validation. The official test set should not be repeatedly
+        used to tune the model, because doing so can make test performance
+        less representative of generalization.
+      </p>
+
+      <div class="note">
+        Fashion MNIST's test set is not automatically the same as a
+        validation set. Use the exact split described by the course
+        implementation when reproducing its results.
+      </div>
+    </section>
+
+    <section id="fashion-model">
+      <h2>10. Fashion MNIST MLP implementation in PyTorch</h2>
+
+      <h3>10.1 Why use an MLP?</h3>
+
+      <p>
+        A multilayer perceptron treats each image as a vector of pixel
+        values and learns combinations of those values. It is a useful
+        model for understanding the complete classification pipeline.
+      </p>
+
+      <p>
+        An MLP does not explicitly preserve the two-dimensional spatial
+        structure in the way a convolutional neural network does. Even
+        so, it can learn a useful mapping from flattened pixels to class
+        scores.
+      </p>
+
+      <h3>10.2 Define the network</h3>
+
+      <pre><code>import torch
+import torch.nn as nn
+
+class FashionMLP(nn.Module):
     def __init__(self):
         super().__init__()
+
         self.network = nn.Sequential(
             nn.Flatten(),
-            nn.Linear(28 * 28, 128),
+            nn.Linear(28 * 28, 256),
             nn.ReLU(),
-            nn.Linear(128, 64),
+            nn.Linear(256, 128),
             nn.ReLU(),
-            nn.Linear(64, 10)
+            nn.Linear(128, 10)
         )
 
     def forward(self, x):
-        return self.network(x)
+        return self.network(x)</code></pre>
 
-model = FashionMLP()
+      <p>
+        The first operation flattens each image. The first linear layer
+        maps 784 input features to 256 hidden features, the second maps
+        256 to 128, and the final layer maps 128 features to ten class
+        logits.
+      </p>
 
+      <h3>10.3 Understand the layer dimensions</h3>
+
+      <table>
+        <thead>
+          <tr><th>Layer</th><th>Input features</th><th>Output features</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Flatten</td><td>Image of 28 × 28 pixels</td><td>784</td></tr>
+          <tr><td>Linear 1</td><td>784</td><td>256</td></tr>
+          <tr><td>Linear 2</td><td>256</td><td>128</td></tr>
+          <tr><td>Output linear layer</td><td>128</td><td>10</td></tr>
+        </tbody>
+      </table>
+
+      <p>
+        For a batch size of 64, the output shape of the final layer is
+        \((64,10)\). Each row contains ten scores for one image.
+      </p>
+
+      <h3>10.4 Count the trainable parameters</h3>
+
+      <p>
+        A fully connected layer with \(n_{\text{in}}\) input features and
+        \(n_{\text{out}}\) output features has:
+      </p>
+
+      <p class="eq">
+        \(\text{Parameters}=n_{\text{in}}n_{\text{out}}+n_{\text{out}}\)
+      </p>
+
+      <p>
+        The first term counts weights, and the second counts biases.
+      </p>
+
+      <p>For the example model:</p>
+
+      <ul>
+        <li>First layer: \(784(256)+256=200{,}960\)</li>
+        <li>Second layer: \(256(128)+128=32{,}896\)</li>
+        <li>Output layer: \(128(10)+10=1{,}290\)</li>
+      </ul>
+
+      <p>Total trainable parameters:</p>
+
+      <p class="eq">
+        \(200{,}960+32{,}896+1{,}290=235{,}146\)
+      </p>
+
+      <p>
+        This is the parameter count for the example architecture above,
+        not a claim that every course implementation uses these exact
+        hidden-layer sizes.
+      </p>
+
+      <h3>10.5 Why are there ten output units?</h3>
+
+      <p>
+        Fashion MNIST has ten classes, so the final layer produces ten
+        class scores. A model can select the class with the highest score
+        using <code>argmax</code>.
+      </p>
+
+      <pre><code>model = FashionMLP()
+
+images, labels = next(iter(train_loader))
+logits = model(images)
+
+print(images.shape)  # Typically [64, 1, 28, 28]
+print(logits.shape)  # [64, 10]
+
+predicted_classes = logits.argmax(dim=1)
+print(predicted_classes.shape)  # [64]</code></pre>
+
+      <p>
+        The ten values are logits, not necessarily probabilities. When
+        using <code>CrossEntropyLoss</code>, pass these logits directly
+        into the loss function.
+      </p>
+    </section>
+
+    <section id="fashion-forward">
+      <h2>11. Fashion MNIST forward pass</h2>
+
+      <h3>11.1 Forward-pass pipeline</h3>
+
+      <ol>
+        <li>Load a batch of images.</li>
+        <li>Flatten each image from 28 × 28 pixels into 784 values.</li>
+        <li>Apply the first linear transformation.</li>
+        <li>Apply ReLU to introduce nonlinearity.</li>
+        <li>Apply the next linear transformation and ReLU.</li>
+        <li>Calculate ten output logits.</li>
+        <li>Compare the logits with the true class labels using a loss function.</li>
+      </ol>
+
+      <h3>11.2 Understand logits and predictions</h3>
+
+      <p>
+        Suppose a model produces the logits:
+      </p>
+
+      <p class="eq">
+        \([1.2,\ -0.5,\ 0.8,\ 2.1,\ 0.1,\ -1.0,\ 0.4,\ 0.7,\ -0.2,\ 1.0]\)
+      </p>
+
+      <p>
+        The largest score is 2.1 at index 3. Using zero-based indexing,
+        <code>argmax</code> predicts class 3, which corresponds to
+        <em>Dress</em> in the standard Fashion MNIST class ordering.
+      </p>
+
+      <p>
+        The largest logit gives the predicted class even before applying
+        softmax, because softmax preserves the ordering of the logits.
+        However, the logit itself is not a probability.
+      </p>
+
+      <h3>11.3 Cross-entropy with logits</h3>
+
+      <pre><code>criterion = nn.CrossEntropyLoss()
+
+logits = model(images)  # Shape: [batch_size, 10]
+loss = criterion(logits, labels)</code></pre>
+
+      <p>
+        The labels are normally integer class indices with shape
+        \((B,)\). Do not apply <code>argmax</code> before calculating
+        the loss: doing so discards the information needed for
+        differentiable training.
+      </p>
+
+      <h3>11.4 Calculate batch accuracy</h3>
+
+      <pre><code>predictions = logits.argmax(dim=1)
+correct = (predictions == labels).sum().item()
+accuracy = correct / labels.size(0)</code></pre>
+
+      <p>
+        If 52 out of 64 images are classified correctly, the batch
+        accuracy is:
+      </p>
+
+      <p class="eq">
+        \(\frac{52}{64}\times100=81.25\%\)
+      </p>
+
+      <p>
+        For a complete dataset, aggregate the number of correct
+        predictions and the number of examples across all batches.
+        Do not simply average batch accuracies if the batches have
+        different sizes.
+      </p>
+
+      <h3>Original GA-style example</h3>
+
+      <p><strong>Question:</strong> A Fashion MNIST MLP receives a batch of 20 images. Its final layer has ten output units. What is the expected shape of the logits?</p>
+
+      <ol type="A">
+        <li>\((20,1)\)</li>
+        <li>\((20,10)\)</li>
+        <li>\((10,20)\)</li>
+        <li>\((20,784)\)</li>
+      </ol>
+
+      <details>
+        <summary>Show answer</summary>
+        <p class="answer">
+          <strong>Answer: B.</strong> Each of the 20 images produces
+          ten class scores, so the output shape is \((20,10)\).
+        </p>
+      </details>
+    </section>
+
+    <section id="fashion-training">
+      <h2>12. Fashion MNIST training loop</h2>
+
+      <h3>12.1 The standard training-loop sequence</h3>
+
+      <p>
+        The training loop processes one batch at a time. Each batch
+        produces predictions and a loss, then backpropagation calculates
+        gradients and the optimizer updates the model.
+      </p>
+
+      <ol>
+        <li>Set training mode.</li>
+        <li>Fetch a batch of images and labels.</li>
+        <li>Clear old gradients.</li>
+        <li>Run the forward pass.</li>
+        <li>Calculate the loss.</li>
+        <li>Run the backward pass.</li>
+        <li>Update model parameters.</li>
+        <li>Accumulate metrics for the epoch.</li>
+      </ol>
+
+      <h3>12.2 Complete training-loop example</h3>
+
+      <pre><code>device = torch.device(
+    "cuda" if torch.cuda.is_available() else "cpu"
+)
+
+model = FashionMLP().to(device)
 criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(
     model.parameters(),
     lr=0.001
-)</code></pre>
-      <p>
-        <code>Flatten()</code> changes each image from shape
-        \((1,28,28)\) to a vector of length 784. The final layer returns
-        10 logits. Cross-entropy uses the correct class label to evaluate
-        those logits.
-      </p>
-
-      <h3>Training loop</h3>
-      <pre><code>device = torch.device(
-    "cuda" if torch.cuda.is_available() else "cpu"
 )
-model = model.to(device)
 
-for epoch in range(5):
+num_epochs = 5
+
+for epoch in range(num_epochs):
     model.train()
-    total_loss = 0.0
+
+    running_loss = 0.0
+    correct = 0
+    total = 0
 
     for images, labels in train_loader:
         images = images.to(device)
         labels = labels.to(device)
 
         optimizer.zero_grad()
+
         logits = model(images)
         loss = criterion(logits, labels)
+
         loss.backward()
         optimizer.step()
 
-        total_loss += loss.item()
+        running_loss += loss.item() * images.size(0)
 
-    average_loss = total_loss / len(train_loader)
+        predictions = logits.argmax(dim=1)
+        correct += (predictions == labels).sum().item()
+        total += labels.size(0)
+
+    epoch_loss = running_loss / total
+    epoch_accuracy = correct / total
+
     print(
         f"Epoch {epoch + 1}: "
-        f"training loss = {average_loss:.4f}"
+        f"loss={epoch_loss:.4f}, "
+        f"accuracy={epoch_accuracy:.4f}"
     )</code></pre>
 
-      <h3>Validation / evaluation loop</h3>
+      <p>
+        This is a general example. It assumes the data loader returns
+        tensors that can be moved to the selected device, and the model
+        architecture is the one defined earlier.
+      </p>
+
+      <h3>12.3 Why multiply the batch loss by batch size?</h3>
+
+      <p>
+        Many PyTorch loss functions return a mean loss across the batch
+        by default. To calculate an example-weighted average over the
+        whole epoch, multiply each mean batch loss by its batch size,
+        sum those values, and divide by the total number of examples.
+      </p>
+
+      <p class="eq">
+        \(\text{Epoch loss}=
+        \frac{\sum_b \text{mean loss}_b\times n_b}
+        {\sum_b n_b}\)
+      </p>
+
+      <p>
+        This matters if the last batch is smaller than the others.
+      </p>
+
+      <h3>12.4 What is an epoch?</h3>
+
+      <p>
+        One epoch is one pass through all training examples. If there
+        are 600 examples and the batch size is 100, an epoch normally
+        contains six batches.
+      </p>
+
+      <p>
+        Training for five epochs means that the model has processed the
+        training set five times, although the order may change between
+        epochs if the loader shuffles the examples.
+      </p>
+
+      <h3>12.5 Why do we shuffle the training data?</h3>
+
+      <p>
+        Shuffling changes the order in which examples appear during
+        training. It helps avoid systematic patterns caused by the
+        original ordering of the dataset and changes the composition
+        of mini-batches across epochs.
+      </p>
+
+      <h3>12.6 Common training-loop mistakes</h3>
+
+      <ul>
+        <li>Forgetting <code>optimizer.zero_grad()</code> and unintentionally accumulating gradients.</li>
+        <li>Calling <code>optimizer.step()</code> before <code>loss.backward()</code>.</li>
+        <li>Using a loss function that does not match the task or target format.</li>
+        <li>Moving the model to the GPU but leaving the input tensors on the CPU.</li>
+        <li>Using the wrong output or label shapes.</li>
+        <li>Reporting only the last batch's loss as the whole epoch's loss.</li>
+        <li>Forgetting to return the model to training mode after evaluation.</li>
+      </ul>
+
+      <div class="note">
+        <strong>Memorize this order:</strong>
+        <code>zero_grad → forward → loss → backward → step</code>.
+      </div>
+    </section>
+
+    <section id="ga2">
+      <h2>13. Week 2 — Graded Assignment 2 preparation</h2>
+
+      <p>
+        According to the lecture sequence you provided, Week 2 – Graded
+        Assignment 2 appears after the Fashion MNIST Classification
+        Training Loop and before the Fashion MNIST Validation Loop.
+      </p>
+
+      <p>
+        The questions below are original practice examples designed to
+        prepare you for the listed concepts. They are not the official
+        graded assignment questions.
+      </p>
+
+      <h3>Question 1 — Universal Approximation Theorem</h3>
+
+      <p>
+        Which statement best describes the Universal Approximation Theorem?
+      </p>
+
+      <ol type="A">
+        <li>Every neural network always achieves zero training error.</li>
+        <li>A suitable network with sufficient hidden units can approximate a broad class of continuous functions on a compact domain.</li>
+        <li>Every network needs exactly one hidden neuron.</li>
+        <li>It guarantees perfect performance on unseen data.</li>
+      </ol>
+
+      <details>
+        <summary>Answer and reasoning</summary>
+        <p class="answer">
+          <strong>Answer: B.</strong> The theorem describes approximation
+          capability under suitable conditions, not guaranteed training
+          success or generalization.
+        </p>
+      </details>
+
+      <h3>Question 2 — Forward pass</h3>
+
+      <p>
+        A neuron receives \(x_1=2\) and \(x_2=4\), with weights
+        \(w_1=3\) and \(w_2=-1\), and bias \(b=2\). ReLU is applied.
+        Calculate the output.
+      </p>
+
+      <details>
+        <summary>Answer and reasoning</summary>
+        <p class="answer">
+          \(z=3(2)+(-1)(4)+2=4\). ReLU returns
+          \(\max(0,4)=4\). The output is <strong>4</strong>.
+        </p>
+      </details>
+
+      <h3>Question 3 — Choose a loss function</h3>
+
+      <p>
+        A model predicts the price of a house. Which loss is a common
+        choice for this regression problem?
+      </p>
+
+      <ol type="A">
+        <li>Cross-entropy only</li>
+        <li>Mean Squared Error</li>
+        <li>Argmax</li>
+        <li>ReLU</li>
+      </ol>
+
+      <details>
+        <summary>Answer and reasoning</summary>
+        <p class="answer">
+          <strong>Answer: B.</strong> The target is a continuous numerical
+          value, making MSE a standard regression loss.
+        </p>
+      </details>
+
+      <h3>Question 4 — Gradient descent update</h3>
+
+      <p>
+        A parameter has current value \(w=1.5\), learning rate
+        \(\eta=0.2\), and gradient \(\frac{\partial L}{\partial w}=3\).
+        Find the updated parameter.
+      </p>
+
+      <details>
+        <summary>Answer and reasoning</summary>
+        <p class="answer">
+          \(w_{\text{new}}=1.5-(0.2)(3)=0.9\).
+          The updated value is <strong>0.9</strong>.
+        </p>
+      </details>
+
+      <h3>Question 5 — Training-loop order</h3>
+
+      <p>
+        Which sequence represents the usual mini-batch training process?
+      </p>
+
+      <ol type="A">
+        <li>Optimizer step → forward → clear gradients → loss</li>
+        <li>Backward → forward → optimizer step → loss</li>
+        <li>Clear gradients → forward → loss → backward → optimizer step</li>
+        <li>Loss → optimizer step → forward → backward</li>
+      </ol>
+
+      <details>
+        <summary>Answer and reasoning</summary>
+        <p class="answer">
+          <strong>Answer: C.</strong> Clear old gradients, calculate
+          predictions, calculate the loss, compute gradients, and then
+          update the parameters.
+        </p>
+      </details>
+
+      <h3>Question 6 — Chain rule</h3>
+
+      <p>
+        If \(u=4x\) and \(y=u^2\), calculate \(\frac{dy}{dx}\) when
+        \(x=3\).
+      </p>
+
+      <details>
+        <summary>Answer and reasoning</summary>
+        <p class="answer">
+          \(u=4(3)=12\).
+          \(\frac{dy}{du}=2u=24\), and
+          \(\frac{du}{dx}=4\). Therefore
+          \(\frac{dy}{dx}=24(4)=96\).
+          <strong>Answer: 96.</strong>
+        </p>
+      </details>
+
+      <h3>Question 7 — XOR</h3>
+
+      <p>
+        Which architecture is appropriate for learning XOR when using
+        ordinary feedforward units and nonlinear activations?
+      </p>
+
+      <ol type="A">
+        <li>A single linear decision unit only</li>
+        <li>A network with a hidden layer and nonlinear activation</li>
+        <li>A model with no trainable parameters</li>
+        <li>A network that never computes a loss</li>
+      </ol>
+
+      <details>
+        <summary>Answer and reasoning</summary>
+        <p class="answer">
+          <strong>Answer: B.</strong> XOR is not linearly separable.
+          A hidden layer with nonlinear activations can form a
+          representation that allows the output layer to separate
+          the classes.
+        </p>
+      </details>
+
+      <h3>Question 8 — Fashion MNIST output shape</h3>
+
+      <p>
+        A batch contains 16 images. Each image is flattened into 784
+        features and passed through a linear output layer with ten units.
+        What is the output shape?
+      </p>
+
+      <details>
+        <summary>Answer and reasoning</summary>
+        <p class="answer">
+          The output shape is <strong>\((16,10)\)</strong>: one row
+          per image and ten class scores per row.
+        </p>
+      </details>
+
+      <h3>Question 9 — PyTorch classification loss</h3>
+
+      <p>
+        A ten-class Fashion MNIST model returns logits of shape
+        \((32,10)\). Which label shape is normally used with
+        <code>nn.CrossEntropyLoss</code> for class-index targets?
+      </p>
+
+      <ol type="A">
+        <li>\((32,)\)</li>
+        <li>\((10,)\)</li>
+        <li>\((32,784)\)</li>
+        <li>\((1,32,10)\)</li>
+      </ol>
+
+      <details>
+        <summary>Answer and reasoning</summary>
+        <p class="answer">
+          <strong>Answer: A.</strong> There is one integer class index
+          per example, so the target shape is normally \((32,)\).
+        </p>
+      </details>
+
+      <h3>Question 10 — Interpreting loss and accuracy</h3>
+
+      <p>
+        During training, training loss decreases while validation loss
+        decreases at first and then begins to increase. What might this
+        pattern indicate?
+      </p>
+
+      <ol type="A">
+        <li>The model may be overfitting the training data.</li>
+        <li>The model definitely has no trainable parameters.</li>
+        <li>The model is guaranteed to improve on unseen data.</li>
+        <li>Training loss and validation loss must always be identical.</li>
+      </ol>
+
+      <details>
+        <summary>Answer and reasoning</summary>
+        <p class="answer">
+          <strong>Answer: A.</strong> The model may be fitting the
+          training data more closely while generalization to held-out
+          data deteriorates. The pattern is a common sign of
+          overfitting, though it should be interpreted alongside
+          other evidence.
+        </p>
+      </details>
+
+      <h3>Question 11 — Tensor dimensions</h3>
+
+      <p>
+        A batch of 40 Fashion MNIST images has shape
+        \((40,1,28,28)\). After flattening each image, what is the shape?
+      </p>
+
+      <details>
+        <summary>Answer and reasoning</summary>
+        <p class="answer">
+          Each image contains 784 pixel values. The flattened batch
+          has shape <strong>\((40,784)\)</strong>.
+        </p>
+      </details>
+
+      <h3>Question 12 — Training versus validation</h3>
+
+      <p>
+        During validation, which pair of operations is appropriate
+        for a typical PyTorch model?
+      </p>
+
+      <ol type="A">
+        <li><code>model.train()</code> and unconditional optimizer updates</li>
+        <li><code>model.eval()</code> and <code>torch.no_grad()</code></li>
+        <li><code>loss.backward()</code> and <code>optimizer.step()</code> for every validation batch</li>
+        <li>Reinitialize the weights for every batch</li>
+      </ol>
+
+      <details>
+        <summary>Answer and reasoning</summary>
+        <p class="answer">
+          <strong>Answer: B.</strong> Evaluation mode changes the
+          behaviour of certain layers, and no-gradient mode avoids
+          building the backward computation graph. A typical validation
+          loop does not update the parameters.
+        </p>
+      </details>
+    </section>
+
+    <section id="fashion-validation">
+      <h2>14. Fashion MNIST validation loop</h2>
+
+      <h3>14.1 Why validate?</h3>
+
+      <p>
+        Training loss tells us how well the model fits the training data.
+        Validation metrics help estimate how well the model performs on
+        held-out examples and can reveal overfitting.
+      </p>
+
+      <p>
+        A model can continue to improve on training examples while its
+        performance on validation examples stops improving. Monitoring
+        both helps guide decisions about model size, regularization,
+        learning rate, and training duration.
+      </p>
+
+      <h3>14.2 Validation-loop example</h3>
+
       <pre><code>model.eval()
+
+val_loss_total = 0.0
 correct = 0
 total = 0
 
 with torch.no_grad():
-    for images, labels in test_loader:
+    for images, labels in val_loader:
         images = images.to(device)
         labels = labels.to(device)
 
         logits = model(images)
-        predictions = logits.argmax(dim=1)
+        loss = criterion(logits, labels)
 
+        val_loss_total += loss.item() * images.size(0)
+
+        predictions = logits.argmax(dim=1)
         correct += (predictions == labels).sum().item()
         total += labels.size(0)
 
-accuracy = correct / total
-print(f"Test accuracy: {accuracy:.4f}")</code></pre>
+val_loss = val_loss_total / total
+val_accuracy = correct / total
+
+print(f"Validation loss: {val_loss:.4f}")
+print(f"Validation accuracy: {val_accuracy:.4f}")</code></pre>
+
       <p>
-        <code>model.eval()</code> switches layers such as dropout and batch
-        normalization into evaluation behaviour. <code>torch.no_grad()</code>
-        disables gradient tracking for evaluation, saving memory and
-        computation. Neither operation updates model parameters.
+        This example assumes <code>val_loader</code>, <code>device</code>,
+        <code>criterion</code>, and <code>model</code> have already been
+        defined.
       </p>
 
-      <div class="note">
-        <strong>Shape checkpoints:</strong> a batch of 64 images has shape
-        (64, 1, 28, 28); after flattening, it has shape (64, 784); the final
-        layer produces (64, 10); the class labels have shape (64,).
-      </div>
-    </section>
+      <h3>14.3 Why use both <code>eval()</code> and <code>no_grad()</code>?</h3>
 
-    <section id="training-validation">
-      <h2>10. Training, validation and generalization</h2>
-      <p>
-        Training data is used to calculate gradients and update model
-        parameters. Validation data helps compare model choices and monitor
-        generalization without using those examples for parameter updates.
-        Test data is generally reserved for a final, less frequently used
-        evaluation.
-      </p>
-
-      <h3>Overfitting and underfitting</h3>
-      <div class="grid">
-        <div class="mini">
-          <h3>Overfitting</h3>
-          <p>
-            The model performs well on training data but worse on validation
-            data. Validation loss may rise while training loss continues to fall.
-          </p>
-          <p><strong>Possible responses:</strong> early stopping, regularization, dropout, a simpler model or more representative data.</p>
-        </div>
-        <div class="mini">
-          <h3>Underfitting</h3>
-          <p>
-            The model performs poorly on both training and validation data.
-          </p>
-          <p><strong>Possible responses:</strong> a more capable model, improved features, more training or less excessive regularization.</p>
-        </div>
-      </div>
-
-      <h3>How to interpret loss</h3>
       <ul>
-        <li>Training loss decreasing is evidence that the model is fitting the training data.</li>
-        <li>Validation loss decreasing can indicate improving performance on unseen examples.</li>
-        <li>Training loss decreasing while validation loss rises can be a sign of overfitting.</li>
-        <li>Loss values should be interpreted alongside the task, metrics and data.</li>
+        <li><code>model.eval()</code> changes the behaviour of layers such as dropout and batch normalization where applicable.</li>
+        <li><code>torch.no_grad()</code> disables gradient tracking in the enclosed operations, reducing memory use and computation.</li>
       </ul>
 
-      <h3>Parameters versus hyperparameters</h3>
+      <p>
+        Calling only one of these does not automatically perform the
+        role of the other.
+      </p>
+
+      <h3>14.4 Training and validation patterns</h3>
+
       <table>
-        <thead><tr><th>Parameters</th><th>Hyperparameters</th></tr></thead>
+        <thead>
+          <tr><th>Training loss</th><th>Validation loss</th><th>Possible interpretation</th></tr>
+        </thead>
         <tbody>
-          <tr><td>Weights</td><td>Learning rate</td></tr>
-          <tr><td>Biases</td><td>Batch size and number of epochs</td></tr>
-          <tr><td>Learned during training</td><td>Number of layers and hidden units</td></tr>
+          <tr><td>High</td><td>High</td><td>The model may be underfitting, not trained enough, or poorly configured.</td></tr>
+          <tr><td>Decreasing</td><td>Decreasing</td><td>The model may be learning useful patterns that generalize.</td></tr>
+          <tr><td>Decreasing</td><td>Increasing</td><td>The model may be overfitting.</td></tr>
+          <tr><td>Low</td><td>Low</td><td>The model fits the training data and performs well on the validation data.</td></tr>
         </tbody>
       </table>
-    </section>
 
-    <section id="ga-practice">
-      <h2>11. Practice and graded-assignment focus</h2>
       <p>
-        The following checklist highlights question types worth practising.
-        It is a revision guide, not a claim about the exact questions in the
-        course portal.
+        These are common patterns, not infallible rules. The interpretation
+        depends on the task, data distribution, metric, and experimental
+        setup.
       </p>
 
-      <h3>Universal approximation and forward passes</h3>
-      <ul>
-        <li>Explain what the Universal Approximation Theorem says and what it does not guarantee.</li>
-        <li>Trace a small network using \(z=Wx+b\), followed by the activation.</li>
-        <li>Check layer dimensions and calculate the shape of each output.</li>
-        <li>Explain why nonlinear activations matter.</li>
-      </ul>
+      <h3>14.5 Model selection</h3>
 
-      <h3>Loss functions and gradient descent</h3>
-      <ul>
-        <li>Select MSE for common regression tasks, BCE for binary classification, and categorical cross-entropy for multiclass classification.</li>
-        <li>Calculate a simple MSE or gradient-descent update.</li>
-        <li>Explain the effect of a learning rate that is too high or too low.</li>
-        <li>Compare batch, stochastic and mini-batch gradient descent.</li>
-      </ul>
+      <p>
+        A common approach is to monitor validation loss after each epoch
+        and retain the model with the best validation performance. This
+        avoids assuming that the final epoch is always the best one.
+      </p>
 
-      <h3>Backpropagation and XOR</h3>
-      <ul>
-        <li>Apply the chain rule to a short scalar expression.</li>
-        <li>Trace gradients through a small multilayer perceptron.</li>
-        <li>Distinguish gradient calculation from the optimizer's parameter update.</li>
-        <li>Explain why XOR cannot be solved by one linear decision boundary.</li>
-      </ul>
+      <pre><code>best_val_loss = float("inf")
+best_state = None
 
-      <h3>Customer churn and Fashion-MNIST</h3>
-      <ul>
-        <li>Identify features and target for a binary churn classifier.</li>
-        <li>Explain encoding, scaling, splitting and avoiding data leakage.</li>
-        <li>Choose a binary-classification loss and understand its expected output format.</li>
-        <li>Recognize Fashion-MNIST image dimensions, flattening, output logits and class labels.</li>
-        <li>Understand the roles of <code>model.train()</code>, <code>model.eval()</code> and <code>torch.no_grad()</code>.</li>
-        <li>Interpret training and validation loss to identify possible overfitting or underfitting.</li>
-      </ul>
+# After computing val_loss for an epoch:
+if val_loss < best_val_loss:
+    best_val_loss = val_loss
+    best_state = {
+        name: tensor.detach().cpu().clone()
+        for name, tensor in model.state_dict().items()
+    }
 
-      <div class="note">
-        <strong>Essential distinction:</strong> forward pass computes the
-        prediction; loss measures the error; backpropagation calculates
-        gradients; the optimizer updates the parameters.
-      </div>
+# After training:
+if best_state is not None:
+    model.load_state_dict(best_state)</code></pre>
+
+      <p>
+        This example keeps the best model state in memory. It can be
+        saved to disk as well if the workflow requires a persistent
+        checkpoint.
+      </p>
     </section>
 
-    <section id="assignments">
-      <h2>12. Week 2 assignments</h2>
+    <section id="model-training">
+      <h2>15. Fashion MNIST model training and evaluation</h2>
+
+      <h3>15.1 What should be monitored?</h3>
+
       <p>
-        Complete the assignments in the order displayed in the course portal.
-        Use the notes to revise the underlying concepts, but follow the
-        portal's own instructions and deadlines for the actual submissions.
+        A training run may track loss and accuracy for both the training
+        and validation sets. Loss provides a measure used for optimization,
+        while accuracy measures the fraction of examples classified
+        correctly.
       </p>
+
+      <p>
+        Two models with the same accuracy can have different losses
+        because loss functions also reflect how confidently the model
+        makes its predictions.
+      </p>
+
+      <h3>15.2 Save a trained model</h3>
+
+      <p>
+        A common PyTorch approach is to save the model's state dictionary,
+        which contains its learned parameters.
+      </p>
+
+      <pre><code>torch.save(model.state_dict(), "fashion_mlp.pth")</code></pre>
+
+      <p>
+        To reload the parameters, create the same architecture and load
+        the saved state:
+      </p>
+
+      <pre><code>model = FashionMLP()
+model.load_state_dict(
+    torch.load("fashion_mlp.pth", map_location=device)
+)
+model.to(device)
+model.eval()</code></pre>
+
+      <p>
+        The architecture must match the saved parameter shapes. A
+        state dictionary stores parameter values; it does not by itself
+        describe every detail of the model's architecture or training
+        history.
+      </p>
+
+      <h3>15.3 Reproducibility</h3>
+
+      <p>
+        Neural network training may involve randomized weight
+        initialization, shuffled data, and other random operations.
+        Fixing random seeds can help make experiments more reproducible.
+      </p>
+
+      <pre><code>import random
+import numpy as np
+import torch
+
+seed = 42
+
+random.seed(seed)
+np.random.seed(seed)
+torch.manual_seed(seed)
+
+if torch.cuda.is_available():
+    torch.cuda.manual_seed_all(seed)</code></pre>
+
+      <p>
+        A fixed seed helps control randomness but does not guarantee
+        bit-for-bit identical results across all devices, library
+        versions, or computational operations.
+      </p>
+
+      <h3>15.4 Common problems and what they mean</h3>
+
+      <table>
+        <thead>
+          <tr><th>Problem</th><th>Likely cause or check</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Matrix shapes cannot be multiplied</td><td>Check input feature count, flattening, and linear-layer dimensions.</td></tr>
+          <tr><td>Expected all tensors on the same device</td><td>Move the model, inputs, and relevant targets to a compatible device.</td></tr>
+          <tr><td>Loss expects integer class labels</td><td>Check whether the classification loss expects class-index targets.</td></tr>
+          <tr><td>Binary loss target shape mismatch</td><td>Check the output-logit shape and floating-point target shape.</td></tr>
+          <tr><td>Loss does not decrease</td><td>Inspect learning rate, data, target encoding, loss choice, gradients, and model configuration.</td></tr>
+          <tr><td>Training accuracy rises but validation performance falls</td><td>Consider overfitting and review validation metrics.</td></tr>
+        </tbody>
+      </table>
+
+      <h3>15.5 Complete conceptual pipeline</h3>
+
+      <p>
+        The entire Fashion MNIST process can be summarized as:
+      </p>
+
       <ol>
-        <li><strong>Week 2 Graded Assignment 2</strong> — revise forward passes, losses, gradient descent, backpropagation, XOR and the applied classification topics.</li>
-        <li><strong>Week 2 Practice Assignment 2</strong> — use it to reinforce the week's concepts and identify topics that need another review.</li>
+        <li>Load and preprocess images.</li>
+        <li>Create data loaders.</li>
+        <li>Define the MLP.</li>
+        <li>Choose a loss function and optimizer.</li>
+        <li>Train over multiple epochs.</li>
+        <li>Validate without updating parameters.</li>
+        <li>Compare metrics and select a suitable model.</li>
+        <li>Save the model if needed.</li>
+        <li>Evaluate on a separate test set when the model-selection process is complete.</li>
       </ol>
-      <div class="note">
-        The practice and graded assignments are separate course activities.
-        Check the portal for their current availability and any updated
-        instructions.
-      </div>
     </section>
 
-    <section id="revision">
-      <h2>13. Formula sheet and quick self-test</h2>
+    <section id="formula-sheet">
+      <h2>16. Week 2 formula sheet</h2>
+
       <table>
-        <thead><tr><th>Concept</th><th>Formula / reminder</th></tr></thead>
+        <thead>
+          <tr><th>Concept</th><th>Formula or rule</th></tr>
+        </thead>
         <tbody>
-          <tr><td>Neuron</td><td>\(z=w^Tx+b\)</td></tr>
-          <tr><td>Activation</td><td>\(a=\phi(z)\)</td></tr>
-          <tr><td>MSE</td><td>\(\frac{1}{N}\sum_i(y_i-\hat y_i)^2\)</td></tr>
-          <tr><td>Binary cross-entropy</td><td>\(-[y\log(p)+(1-y)\log(1-p)]\)</td></tr>
-          <tr><td>Gradient descent</td><td>\(\theta\leftarrow\theta-\eta\nabla_\theta L\)</td></tr>
-          <tr><td>Chain rule</td><td>\(\frac{dy}{dx}=\frac{dy}{du}\frac{du}{dx}\)</td></tr>
-          <tr><td>Softmax</td><td>\(\frac{e^{z_i}}{\sum_j e^{z_j}}\)</td></tr>
-          <tr><td>Standardization</td><td>\(x'=(x-\mu)/\sigma\)</td></tr>
+          <tr>
+            <td>Neuron weighted sum</td>
+            <td>\(z=Wx+b\)</td>
+          </tr>
+          <tr>
+            <td>Activation</td>
+            <td>\(a=f(z)\)</td>
+          </tr>
+          <tr>
+            <td>ReLU</td>
+            <td>\(f(x)=\max(0,x)\)</td>
+          </tr>
+          <tr>
+            <td>Sigmoid</td>
+            <td>\(\sigma(x)=\frac{1}{1+e^{-x}}\)</td>
+          </tr>
+          <tr>
+            <td>Mean Squared Error</td>
+            <td>\(\frac{1}{N}\sum_i(y_i-\hat y_i)^2\)</td>
+          </tr>
+          <tr>
+            <td>Binary cross-entropy</td>
+            <td>\(-[y\log p+(1-y)\log(1-p)]\)</td>
+          </tr>
+          <tr>
+            <td>Gradient descent</td>
+            <td>\(w_{\text{new}}=w_{\text{old}}-\eta\frac{\partial L}{\partial w}\)</td>
+          </tr>
+          <tr>
+            <td>Chain rule</td>
+            <td>\(\frac{dy}{dx}=\frac{dy}{du}\frac{du}{dx}\)</td>
+          </tr>
+          <tr>
+            <td>Linear-layer parameter count</td>
+            <td>\(n_{\text{in}}n_{\text{out}}+n_{\text{out}}\)</td>
+          </tr>
+          <tr>
+            <td>Flattened Fashion MNIST image</td>
+            <td>\(28\times28=784\) features</td>
+          </tr>
+          <tr>
+            <td>Classification prediction</td>
+            <td><code>logits.argmax(dim=1)</code></td>
+          </tr>
+          <tr>
+            <td>Training-loop order</td>
+            <td><code>zero_grad → forward → loss → backward → step</code></td>
+          </tr>
         </tbody>
       </table>
 
-      <details>
-        <summary>1. What does the Universal Approximation Theorem tell us?</summary>
-        <p class="answer">
-          Under suitable conditions, a network with enough hidden units and
-          suitable nonlinear activations can approximate a broad class of
-          continuous functions. It does not guarantee successful training.
-        </p>
-      </details>
+      <h3>Important PyTorch reminders</h3>
 
-      <details>
-        <summary>2. What is the difference between forward pass and backpropagation?</summary>
-        <p class="answer">
-          The forward pass computes outputs and loss. Backpropagation calculates
-          gradients of the loss with respect to parameters.
-        </p>
-      </details>
-
-      <details>
-        <summary>3. What does the optimizer do?</summary>
-        <p class="answer">
-          It uses the gradients to update the trainable parameters according
-          to its update rule.
-        </p>
-      </details>
-
-      <details>
-        <summary>4. Which loss is commonly used for regression?</summary>
-        <p class="answer">
-          Mean squared error is a common choice for regression.
-        </p>
-      </details>
-
-      <details>
-        <summary>5. Why is cross-entropy used for classification?</summary>
-        <p class="answer">
-          It measures how well predicted class probabilities or logits align
-          with the correct class labels, according to the chosen formulation.
-        </p>
-      </details>
-
-      <details>
-        <summary>6. What happens if the learning rate is too high?</summary>
-        <p class="answer">
-          Updates may overshoot useful parameter values and make training
-          unstable or prevent it from converging.
-        </p>
-      </details>
-
-      <details>
-        <summary>7. Why can't a single linear classifier solve XOR?</summary>
-        <p class="answer">
-          The XOR classes are not linearly separable, so one straight
-          decision boundary cannot separate the positive and negative examples.
-        </p>
-      </details>
-
-      <details>
-        <summary>8. Why fit a scaler only on training data?</summary>
-        <p class="answer">
-          To avoid data leakage. Validation and test data should not influence
-          the preprocessing statistics learned from training data.
-        </p>
-      </details>
-
-      <details>
-        <summary>9. Why flatten a Fashion-MNIST image for an MLP?</summary>
-        <p class="answer">
-          A 28 × 28 image has 784 pixel values. Flattening converts each image
-          into a vector of length 784, suitable for a fully connected input layer.
-        </p>
-      </details>
-
-      <details>
-        <summary>10. What is overfitting?</summary>
-        <p class="answer">
-          The model fits the training data well but generalizes poorly to
-          unseen data. One possible sign is training loss falling while
-          validation loss rises.
-        </p>
-      </details>
-
-      <div class="note">
-        <strong>Final memory chain:</strong>
-        forward pass → loss → backpropagation → gradients →
-        optimizer update → repeat → validation.
-      </div>
+      <ul>
+        <li><code>loss.backward()</code> calculates gradients.</li>
+        <li><code>optimizer.step()</code> updates parameters.</li>
+        <li><code>optimizer.zero_grad()</code> clears existing gradients.</li>
+        <li><code>model.train()</code> selects training mode.</li>
+        <li><code>model.eval()</code> selects evaluation mode.</li>
+        <li><code>torch.no_grad()</code> disables gradient tracking in a context.</li>
+        <li><code>nn.CrossEntropyLoss</code> normally takes logits and integer class labels.</li>
+        <li><code>nn.BCEWithLogitsLoss</code> takes logits and compatible floating-point targets.</li>
+        <li><code>nn.MSELoss</code> measures mean squared numerical error.</li>
+      </ul>
     </section>
 
-    <section id="references">
-      <h2>14. References and further reading</h2>
-      <ul>
-        <li>
-          <a href="https://study.iitm.ac.in/ds/course_pages/BSDA2001.html"
-             target="_blank" rel="noopener">
-            Official IIT Madras BSDA2001 course page
-          </a>
-        </li>
-        <li>
-          <a href="https://docs.pytorch.org/tutorials/beginner/basics/tensorqs_tutorial.html"
-             target="_blank" rel="noopener">
-            PyTorch tensor basics
-          </a>
-        </li>
-        <li>
-          <a href="https://docs.pytorch.org/tutorials/beginner/basics/autogradqs_tutorial.html"
-             target="_blank" rel="noopener">
-            PyTorch automatic differentiation
-          </a>
-        </li>
-        <li>
-          <a href="https://pytorch.org/tutorials/beginner/basics/optimization_tutorial.html"
-             target="_blank" rel="noopener">
-            PyTorch optimization tutorial
-          </a>
-        </li>
-        <li>
-          <a href="https://pytorch.org/vision/stable/generated/torchvision.datasets.FashionMNIST.html"
-             target="_blank" rel="noopener">
-            Fashion-MNIST dataset documentation
-          </a>
-        </li>
-      </ul>
+    <section id="practice2">
+      <h2>17. Week 2 — Practice Assignment 2</h2>
+
       <p>
-        Use these notes as a study aid. Refer to course materials and the
-        assignment portal for the exact assessed scope and submission rules.
+        This final set is original revision practice based on the Week 2
+        topics you supplied. Try each question before opening its answer.
+      </p>
+
+      <h3>Question 1 — Gradient descent</h3>
+
+      <p>
+        A weight is initially 5. The gradient is 0.4 and the learning
+        rate is 0.25. What is the updated weight?
+      </p>
+
+      <details>
+        <summary>Answer</summary>
+        <p class="answer">
+          \(w_{\text{new}}=5-(0.25)(0.4)=4.9\).
+          <strong>Answer: 4.9.</strong>
+        </p>
+      </details>
+
+      <h3>Question 2 — Negative gradient</h3>
+
+      <p>
+        If the current weight is 1.2, the learning rate is 0.1, and
+        the gradient is -0.5, does the weight increase or decrease?
+      </p>
+
+      <details>
+        <summary>Answer</summary>
+        <p class="answer">
+          \(w_{\text{new}}=1.2-(0.1)(-0.5)=1.25\).
+          The weight increases by 0.05.
+        </p>
+      </details>
+
+      <h3>Question 3 — Universal approximation</h3>
+
+      <p>
+        Why are nonlinear activations important when stacking neural
+        network layers?
+      </p>
+
+      <details>
+        <summary>Answer</summary>
+        <p class="answer">
+          Without nonlinear activations, a composition of linear layers
+          is equivalent to a single linear transformation. Nonlinear
+          activations allow the network to represent nonlinear
+          input-output relationships.
+        </p>
+      </details>
+
+      <h3>Question 4 — MSE calculation</h3>
+
+      <p>
+        Targets are \([2,4,6]\), and predictions are \([3,2,7]\).
+        Calculate the MSE.
+      </p>
+
+      <details>
+        <summary>Answer</summary>
+        <p class="answer">
+          The squared errors are \(1,4,1\). Therefore,
+          \(\operatorname{MSE}=(1+4+1)/3=2\).
+          <strong>Answer: 2.</strong>
+        </p>
+      </details>
+
+      <h3>Question 5 — Backpropagation</h3>
+
+      <p>
+        Given \(u=5x\) and \(y=u^2\), calculate
+        \(\frac{dy}{dx}\) at \(x=2\).
+      </p>
+
+      <details>
+        <summary>Answer</summary>
+        <p class="answer">
+          \(u=10\), so \(\frac{dy}{du}=2u=20\), while
+          \(\frac{du}{dx}=5\). Thus,
+          \(\frac{dy}{dx}=20(5)=100\).
+        </p>
+      </details>
+
+      <h3>Question 6 — Churn classification</h3>
+
+      <p>
+        A model predicts whether each customer will churn, with one
+        binary target per customer. Which loss is a standard choice
+        when the model returns one logit per customer?
+      </p>
+
+      <details>
+        <summary>Answer</summary>
+        <p class="answer">
+          <code>nn.BCEWithLogitsLoss</code>, with floating-point targets
+          shaped compatibly with the logits.
+        </p>
+      </details>
+
+      <h3>Question 7 — Fashion MNIST dimensions</h3>
+
+      <p>
+        A linear layer maps 784 features to 100 neurons. How many
+        trainable weights and biases does it have?
+      </p>
+
+      <details>
+        <summary>Answer</summary>
+        <p class="answer">
+          Weights: \(784(100)=78{,}400\). Biases: \(100\).
+          Total: <strong>78,500 parameters.</strong>
+        </p>
+      </details>
+
+      <h3>Question 8 — Cross-entropy</h3>
+
+      <p>
+        Why should the output of a ten-class classifier usually be
+        passed as logits directly to <code>nn.CrossEntropyLoss</code>?
+      </p>
+
+      <details>
+        <summary>Answer</summary>
+        <p class="answer">
+          <code>nn.CrossEntropyLoss</code> performs the appropriate
+          log-softmax and loss calculation internally. Passing logits
+          directly is the standard numerically stable approach.
+        </p>
+      </details>
+
+      <h3>Question 9 — Validation</h3>
+
+      <p>
+        Does <code>model.eval()</code> automatically disable gradient
+        tracking?
+      </p>
+
+      <details>
+        <summary>Answer</summary>
+        <p class="answer">
+          No. <code>model.eval()</code> changes the behaviour of
+          certain layers. Use <code>torch.no_grad()</code> or another
+          suitable gradient-control context to disable gradient tracking
+          during ordinary validation.
+        </p>
+      </details>
+
+      <h3>Question 10 — Overfitting</h3>
+
+      <p>
+        Training accuracy is 99%, but validation accuracy is 72%.
+        What should you investigate?
+      </p>
+
+      <details>
+        <summary>Answer</summary>
+        <p class="answer">
+          The large gap may indicate overfitting or a mismatch between
+          training and validation data. Check data quality, split
+          consistency, leakage, model complexity, regularization, and
+          training duration before deciding on a remedy.
+        </p>
+      </details>
+
+      <h3>Question 11 — XOR</h3>
+
+      <p>
+        What is the XOR output for inputs \((1,1)\), and why is XOR
+        important in neural network theory?
+      </p>
+
+      <details>
+        <summary>Answer</summary>
+        <p class="answer">
+          The output is 0 because the inputs are the same. XOR is an
+          important example of a non-linearly separable problem that
+          cannot be solved by a single linear decision boundary but
+          can be represented by a suitable multilayer network.
+        </p>
+      </details>
+
+      <h3>Question 12 — Mini-batches</h3>
+
+      <p>
+        A training dataset has 1,200 examples and a batch size of 100.
+        How many batches are there in one epoch if every example is
+        processed exactly once?
+      </p>
+
+      <details>
+        <summary>Answer</summary>
+        <p class="answer">
+          \(1200/100=12\). There are <strong>12 batches per epoch</strong>.
+        </p>
+      </details>
+
+      <h3>Final checklist</h3>
+
+      <p>Before completing Week 2 revision, make sure you can:</p>
+
+      <ul>
+        <li>Explain the Universal Approximation Theorem and why nonlinear activations matter.</li>
+        <li>Calculate weighted sums, biases, activations, and small MLP forward passes.</li>
+        <li>Choose MSE, binary cross-entropy, or multiclass cross-entropy for the appropriate task.</li>
+        <li>Apply the gradient descent update rule with positive and negative gradients.</li>
+        <li>Explain batch, stochastic, and mini-batch gradient descent.</li>
+        <li>Write the correct sequence of operations in a PyTorch training loop.</li>
+        <li>Apply the chain rule to scalar functions and understand its role in MLP backpropagation.</li>
+        <li>Explain why a single linear model cannot solve XOR.</li>
+        <li>Describe the data preprocessing and model-training pipeline for customer churn prediction.</li>
+        <li>Explain Fashion MNIST image shapes, flattening, output logits, and cross-entropy targets.</li>
+        <li>Distinguish training, validation, and test data.</li>
+        <li>Interpret training and validation metrics and recognize possible overfitting.</li>
+      </ul>
+
+      <p>
+        <strong>Week 2 completed:</strong> You have now covered the
+        progression from a network's approximation capability to forward
+        propagation, loss calculation, gradient-based learning,
+        backpropagation, nonlinear classification, and end-to-end
+        PyTorch training and validation.
       </p>
     </section>
 
@@ -858,8 +2697,10 @@ print(f"Test accuracy: {accuracy:.4f}")</code></pre>
 </main>
 
 <footer class="site-footer">
-  IIT Madras BS Data Science · Introduction to Deep Learning and Generative AI (BSDA2001)
-  <br>Understand the concepts, trace the calculations and practise the training loops.
+  <p>BSDA2001 · Introduction to Deep Learning and Generative AI</p>
+  <p><a href="index.html">Back to course notes</a> · <a href="week1.html">Week 1</a></p>
+  <p>Study notes and original practice examples. Refer to the official course portal for authoritative assignment instructions.</p>
 </footer>
+
 </body>
 </html>

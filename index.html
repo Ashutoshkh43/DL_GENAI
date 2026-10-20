@@ -1,17 +1,87 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="First-year-friendly BSDA2001 notes for Introduction to Deep Learning and Generative AI."><title>Introduction to Deep Learning & Generative AI | BSDA2001</title>
-<script>window.MathJax={tex:{inlineMath:[['\\(','\\)'],['$','$']],displayMath:[['\\[','\\]'],['$$','$$']]}};</script><script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script><link rel="stylesheet" href="styles.css"><script defer src="script.js"></script></head>
-<body><header class="site-header"><div class="topbar"><a class="brand" href="index.html">BSDA2001 · Deep Learning</a><nav class="site-nav" aria-label="Main navigation"><a href="index.html" aria-current="page">Introduction</a><a href="week1.html" >Week 1</a><a href="week2.html" >Week 2</a></nav></div><div class="page-intro"><h1>Introduction to Deep Learning & Generative AI</h1><p>Course guide and conceptual roadmap · Begin here before studying the weekly notes.</p></div></header>
-<main class="page-layout"><nav class="toc" aria-label="On this page"><strong>On this page</strong><a href="#how-to-use-these-notes">How to use these notes</a><a href="#before-neural-networks-from-machine-learning-to-deep-learning">Before neural networks: from machine learning to deep learning</a></nav><article class="content"><div class="page-links"><a class="page-link" href="week1.html">Start Week 1: Foundations →</a><a class="page-link" href="week2.html">Continue to Week 2: Training & Practice →</a></div><section id="how-to-use-these-notes"><span class="label">START HERE</span><h2 id="how-to-use-these-notes">How to use these notes</h2>
-<p>Study Week 1 first: understand what a neuron computes, how activation functions work, and how data is represented. Then study Week 2: build a model, choose a loss and optimizer, train it, and compare experiments.</p>
-<div class="note"><b>Course alignment:</b> The IIT Madras BSDA2001 course page describes Week 2 as ANN practice with TensorFlow/Keras, activation functions, and optimization methods. PyTorch examples are included as supplementary framework practice.</div>
-<p>These notes have been cross-checked against the supplied lecture slides and expanded to include the historical neuron models, traditional ML limitations, loss landscape, activation variants, tensor operations, and layer-by-layer backpropagation. Equations are rendered using MathJax, which may require an internet connection. Use <b>Print / Save as PDF</b> to create a printable copy.</p></section><section id="before-neural-networks-from-machine-learning-to-deep-learning"><span class="label">CONTEXT</span><h2 id="before-neural-networks-from-machine-learning-to-deep-learning">Before neural networks: from machine learning to deep learning</h2>
-<p>To understand why neural networks were developed, first consider the general problem: we have examples and want a computer to learn a rule that works on new examples.</p>
-<h3>Artificial intelligence, machine learning, and deep learning</h3>
-<ul><li><b>Artificial intelligence (AI):</b> the broad field of building systems that perform tasks associated with intelligence.</li><li><b>Machine learning (ML):</b> a part of AI in which a system learns patterns from examples instead of relying only on rules written by a programmer.</li><li><b>Deep learning (DL):</b> a part of ML that uses neural networks with multiple processing layers to learn useful representations from data.</li><li><b>Generative AI:</b> AI that creates new content, such as text, images, audio, or code. It uses many of the deep-learning ideas introduced later in this course.</li></ul>
-<p>For example, a hand-written rule-based spam filter might search for a fixed list of suspicious words. A machine-learning spam filter learns associations from labelled spam and non-spam messages. A deep-learning system can learn more complex patterns from text, sometimes with less manual feature design.</p>
-<h3>Traditional machine learning and feature engineering</h3><p>A <b>feature</b> is a measurable input used by a model, such as house area, number of rooms, or a pixel value. <b>Feature engineering</b> means humans choose or construct useful inputs before model training. In traditional workflows, domain experts may need to design these features carefully.</p>
-<table><tr><th>Approach</th><th>Typical idea</th><th>Strength / limitation</th></tr><tr><td>Linear models</td><td>Learn a weighted combination of features</td><td>Fast and interpretable, but limited for complex patterns</td></tr><tr><td>Tree-based models</td><td>Learn a sequence of if/then splits</td><td>Powerful for structured/tabular data</td></tr><tr><td>Deep learning</td><td>Learn layers of representations from data</td><td>Useful for complex images, audio, text, and other high-dimensional inputs; often needs more data and computation</td></tr></table>
-<p>Traditional ML can struggle when raw inputs are very large, such as every pixel in an image, because manually designing the right features is difficult. Deep learning can learn simple features first and combine them into more complex features in later layers. This is called <b>representation learning</b>.</p>
-<div class="note"><b>Connection to the next topic:</b> A neural network is a function that transforms input features into an output. The next sections build this function from its smallest component: a neuron.</div></section></article></main>
-<footer class="site-footer">IIT Madras BS Data Science · Introduction to Deep Learning and Generative AI (BSDA2001)<br>Study the concepts in sequence, work through the equations, and run the code examples to connect theory with practice.</footer></body></html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="First-year-friendly BSDA2001 notes for Introduction to Deep Learning and Generative AI.">
+  <title>Introduction to Deep Learning &amp; Generative AI | BSDA2001</title>
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)'], ['$','$']],
+        displayMath: [['\\[','\\]'], ['$$','$$']]
+      }
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="script.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="topbar">
+      <a class="brand" href="index.html">BSDA2001 · Deep Learning</a>
+      <nav class="site-nav" aria-label="Main navigation">
+        <a href="index.html" aria-current="page">Introduction</a>
+        <a href="week1.html">Week 1</a>
+        <a href="week2.html">Week 2</a>
+        <a href="week3.html">Week 3</a>
+      </nav>
+    </div>
+    <div class="page-intro">
+      <h1>Introduction to Deep Learning &amp; Generative AI</h1>
+      <p>Course guide and conceptual roadmap · Begin here before studying the weekly notes.</p>
+    </div>
+  </header>
+  <main class="page-layout">
+    <nav class="toc" aria-label="On this page">
+      <strong>Course weeks</strong>
+      <a href="index.html" aria-current="page">Introduction</a>
+      <a href="week1.html">Week 1</a>
+      <a href="week2.html">Week 2</a>
+      <a href="week3.html">Week 3</a>
+      <hr class="sidebar-divider">
+      <strong>On this page</strong>
+      <a href="#how-to-use-these-notes">How to use these notes</a>
+      <a href="#before-neural-networks-from-machine-learning-to-deep-learning">Before neural networks: from machine learning to deep learning</a>
+    </nav>
+    <article class="content">
+      <div class="page-links">
+        <a class="page-link" href="week1.html">Start Week 1: Foundations →</a>
+        <a class="page-link" href="week2.html">Continue to Week 2: Training &amp; Practice →</a>
+      </div>
+      <section id="how-to-use-these-notes">
+        <span class="label">START HERE</span>
+        <h2>How to use these notes</h2>
+        <p>Study Week 1 first: understand what a neuron computes, how activation functions work, and how data is represented. Then study Week 2: build a model, choose a loss and optimizer, train it, and compare experiments.</p>
+        <div class="note"><b>Course alignment:</b> The IIT Madras BSDA2001 course page describes Week 2 as ANN practice with TensorFlow/Keras, activation functions, and optimization methods. PyTorch examples are included as supplementary framework practice.</div>
+        <p>These notes have been cross-checked against the supplied lecture slides and expanded to include the historical neuron models, traditional ML limitations, loss landscape, activation variants, tensor operations, and layer-by-layer backpropagation. Equations are rendered using MathJax, which may require an internet connection. Use <b>Print / Save as PDF</b> to create a printable copy.</p>
+      </section>
+      <section id="before-neural-networks-from-machine-learning-to-deep-learning">
+        <span class="label">CONTEXT</span>
+        <h2>Before neural networks: from machine learning to deep learning</h2>
+        <p>To understand why neural networks were developed, first consider the general problem: we have examples and want a computer to learn a rule that works on new examples.</p>
+        <h3>Artificial intelligence, machine learning, and deep learning</h3>
+        <ul>
+          <li><b>Artificial intelligence (AI):</b> the broad field of building systems that perform tasks associated with intelligence.</li>
+          <li><b>Machine learning (ML):</b> a part of AI in which a system learns patterns from examples instead of relying only on rules written by a programmer.</li>
+          <li><b>Deep learning (DL):</b> a part of ML that uses neural networks with multiple processing layers to learn useful representations from data.</li>
+          <li><b>Generative AI:</b> AI that creates new content, such as text, images, audio, or code. It uses many of the deep-learning ideas introduced later in this course.</li>
+        </ul>
+        <p>For example, a hand-written rule-based spam filter might search for a fixed list of suspicious words. A machine-learning spam filter learns associations from labelled spam and non-spam messages. A deep-learning system can learn more complex patterns from text, sometimes with less manual feature design.</p>
+        <h3>Traditional machine learning and feature engineering</h3>
+        <p>A <b>feature</b> is a measurable input used by a model, such as house area, number of rooms, or a pixel value. <b>Feature engineering</b> means humans choose or construct useful inputs before model training. In traditional workflows, domain experts may need to design these features carefully.</p>
+        <table>
+          <tr><th>Approach</th><th>Typical idea</th><th>Strength / limitation</th></tr>
+          <tr><td>Linear models</td><td>Learn a weighted combination of features</td><td>Fast and interpretable, but limited for complex patterns</td></tr>
+          <tr><td>Tree-based models</td><td>Learn a sequence of if/then splits</td><td>Powerful for structured/tabular data</td></tr>
+          <tr><td>Deep learning</td><td>Learn layers of representations from data</td><td>Useful for complex images, audio, text, and other high-dimensional inputs; often needs more data and computation</td></tr>
+        </table>
+        <p>Traditional ML can struggle when raw inputs are very large, such as every pixel in an image, because manually designing the right features is difficult. Deep learning can learn simple features first and combine them into more complex features in later layers. This is called <b>representation learning</b>.</p>
+        <div class="note"><b>Connection to the next topic:</b> A neural network is a function that transforms input features into an output. The next sections build this function from its smallest component: a neuron.</div>
+      </section>
+    </article>
+  </main>
+  <footer class="site-footer">IIT Madras BS Data Science · Introduction to Deep Learning and Generative AI (BSDA2001)<br>Study the concepts in sequence, work through the equations, and run the code examples to connect theory with practice.</footer>
+</body>
+</html>
