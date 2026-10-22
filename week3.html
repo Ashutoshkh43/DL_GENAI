@@ -2062,6 +2062,92 @@ self.fc = nn.Linear(2048, 10)</code></pre>
     </ol>
 
     <p><strong>Assignment placement:</strong> According to the sequence you provided, the Practice Assignment and Graded Assignment appear at the end of Week 3. Your supplied topic list does not include a separate item labelled “Activity Assignment”.</p>
+
+    <h3 id="ga">GA — Week 3 Graded Assignment</h3>
+    
+    <p>Worked solutions to the questions supplied are below. For the convolution and pooling calculations, assume the usual stride of 1 for convolution and non-overlapping pooling with stride equal to its window size unless stated otherwise.</p>
+
+    <h4>Part A — Convolution and fully connected layers</h4>
+    <div class="question">
+        <strong>Question 1. Padding and filter size</strong>
+        <p>What relation between filter size <code>F₁</code> and padding <code>P</code> keeps the output feature map's width and height equal to the input, assuming stride 1?</p>
+        <p><strong>Answer:</strong> <code>P = (F₁ − 1) / 2</code>, equivalently <code>F₁ = 2P + 1</code>.</p>
+        <p>With stride 1, the one-dimensional output size is <code>O = I + 2P − F₁ + 1</code>. For the output to equal the input, set <code>O = I</code>: <code>2P − F₁ + 1 = 0</code>. Thus the padding must be half the filter size minus one. This gives integer symmetric padding when <code>F₁</code> is odd (for example, a 3 × 3 filter uses padding 1).</p>
+    </div>
+
+    <div class="question">
+        <strong>Question 2. Convolution output dimensions</strong>
+        <p>An input has size <code>1 × 16 × 16</code> (depth × width × height). A <code>5 × 5</code> filter is applied with zero padding and stride 1. What is the output feature map size, in depth × width × height order?</p>
+        <p><strong>Answer:</strong> <code>1 × 12 × 12</code> (depth × width × height).</p>
+        <p>With input width and height 16, filter size 5, zero padding, and stride 1: <code>O = floor((16 + 2·0 − 5) / 1) + 1 = 12</code>. The single input channel is the depth here, so the result is 1 × 12 × 12.</p>
+    </div>
+
+    <div class="question">
+        <strong>Question 3. Multiple filters</strong>
+        <p>Using the setup in Question 2, what is the output feature map size when the convolution layer uses four filters?</p>
+        <p><strong>Answer:</strong> <code>4 × 12 × 12</code>.</p>
+        <p>Each of the four filters produces one feature map. The spatial dimensions stay 12 × 12 because the input, kernel, padding, and stride are unchanged. The number of filters sets output depth to 4.</p>
+    </div>
+
+    <div class="question">
+        <strong>Question 4. Max pooling</strong>
+        <p>Using the output from Question 3, what pooling filter size <code>F₂</code> produces an output of <code>4 × 6 × 6</code>? Assume non-overlapping pooling, so the stride equals the filter size.</p>
+        <p><strong>Answer:</strong> <code>F₂ = 2</code>, assuming the pooling stride equals the window size.</p>
+        <p>The input to pooling is 4 × 12 × 12. A 2 × 2 max-pooling window with stride 2 halves each spatial dimension: <code>12 / 2 = 6</code>. Pooling does not change the four channels, giving 4 × 6 × 6. If stride were independently specified, the window size alone would not determine this output.</p>
+    </div>
+
+    <div class="question">
+        <strong>Question 5. Flattening and fully connected layer</strong>
+        <p>After max pooling, flatten the output and feed it to a fully connected hidden layer with <code>x</code> neurons. If its weight matrix contains 2,880 parameters, find <code>x</code>.</p>
+        <p><strong>Answer:</strong> <code>x = 20</code> neurons.</p>
+        <p>Flattening 4 × 6 × 6 produces <code>4 · 6 · 6 = 144</code> input features. A dense weight matrix from 144 inputs to <code>x</code> neurons contains <code>144x</code> weights. Set this equal to 2,880: <code>144x = 2880</code>, so <code>x = 2880 / 144 = 20</code>.</p>
+    </div>
+
+    <div class="question">
+        <strong>Question 6. Classification head parameters</strong>
+        <p>Using the value of <code>x</code> from Question 5, how many weight parameters connect the hidden layer to a classification head with five output neurons? Ignore biases.</p>
+        <p><strong>Answer:</strong> <code>100</code> weights, ignoring biases.</p>
+        <p>The hidden layer has 20 neurons and the classification head has 5 output neurons. Its weight matrix therefore has <code>20 · 5 = 100</code> parameters.</p>
+    </div>
+
+    <h4>Part B — Exponential Moving Average (EMA)</h4>
+    <div class="question">
+        <strong>Question 7. Running mean after two updates</strong>
+        <p>EMA updates follow <code>μrunning,new = (1 − α)μrunning + αμB</code>. Given consecutive batch means <code>μB₁ = 10</code> and <code>μB₂ = 20</code>, and initial running mean <code>μ₀</code>, express the running mean <code>μ₂</code> after both updates in terms of <code>μ₀</code>, <code>μB₁</code>, <code>μB₂</code>, and <code>α</code>.</p>
+        <p><strong>Answer:</strong> <code>μ₂ = (1 − α)²μ₀ + α(1 − α)μB₁ + αμB₂</code>.</p>
+        <p>Apply the recurrence to the first batch: <code>μ₁ = (1 − α)μ₀ + αμB₁</code>. Apply it again to the second batch: <code>μ₂ = (1 − α)μ₁ + αμB₂</code>. Substituting the first expression gives the answer above. With the supplied batch means, this is <code>μ₂ = (1 − α)²μ₀ + 10α(1 − α) + 20α</code>.</p>
+    </div>
+
+    <div class="question">
+        <strong>Question 8. Finding the initial running mean</strong>
+        <p>Using the batch means and EMA rule from Question 7, find <code>μ₀</code> when <code>α = 0.5</code> and the running mean after two updates is <code>μ₂ = 12.5</code>.</p>
+        <p><strong>Answer:</strong> <code>μ₀ = 0</code>.</p>
+        <p>For <code>α = 0.5</code>, the two-update formula becomes <code>μ₂ = 0.25μ₀ + 0.25(10) + 0.5(20) = 0.25μ₀ + 12.5</code>. Given <code>μ₂ = 12.5</code>, subtract 12.5 from both sides to get <code>0.25μ₀ = 0</code>, hence <code>μ₀ = 0</code>.</p>
+    </div>
+
+    <h4>Part C — PyTorch and neural network operations</h4>
+    <div class="question">
+        <strong>Question 9. Adaptive max pooling</strong>
+        <p>What is the primary purpose of <code>nn.AdaptiveMaxPool2d(1)</code>?</p>
+        <p><strong>Answer:</strong> <code>nn.AdaptiveMaxPool2d(1)</code> maps each channel's spatial feature map to a 1 × 1 value by taking its maximum.</p>
+        <p>For an input shaped <code>(N, C, H, W)</code>, the output is <code>(N, C, 1, 1)</code>, regardless of the input height and width. It keeps batch size and channel count, and is often used before flattening a CNN classifier.</p>
+    </div>
+
+    <div class="question">
+        <strong>Question 10. Convolution and max-pooling output</strong>
+        <p>Consider this code and determine the resulting tensor shape and relevant output properties:</p>
+        <pre><code>x = nn.Conv2d(3, 16, 5)(torch.randn(1, 3, 32, 32))
+x = nn.MaxPool2d(2, 2)(x)</code></pre>
+        <p><strong>Answer:</strong> The convolution output is <code>(1, 16, 28, 28)</code>; after max pooling it is <code>(1, 16, 14, 14)</code>.</p>
+        <p><code>Conv2d(3, 16, 5)</code> uses 16 filters of size 5 × 5, with default stride 1 and no padding. Each spatial dimension becomes <code>(32 − 5) + 1 = 28</code>. A 2 × 2 max-pooling window with stride 2 then halves 28 to 14. The batch dimension remains 1 and channels remain 16. The answer choices were not included in the supplied text; select the option that states this resulting shape (and any equivalent true statements).</p>
+    </div>
+
+    <div class="question">
+        <strong>Question 11. Cross-entropy loss shape</strong>
+        <p>A model returns logits with shape <code>(16, 10)</code>, and the class labels have shape <code>(16,)</code>. What shape does <code>nn.CrossEntropyLoss()</code> return with its default settings?</p>
+        <p><strong>Answer:</strong> A scalar, zero-dimensional tensor (shape <code>[]</code>) with the default <code>reduction="mean"</code>.</p>
+        <p>The logits have one row per sample and one column per class: <code>(16, 10)</code>. Class-index targets have shape <code>(16,)</code>. <code>nn.CrossEntropyLoss()</code> computes one loss per sample internally, then averages those 16 losses by default, returning one scalar. With <code>reduction="none"</code>, it would instead return shape <code>(16,)</code>.</p>
+    </div>
 </div>
 
 </article>
