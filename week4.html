@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="BSDA2001 Week 4: verified course scope and a clearly labelled supplementary CNN image-classification walkthrough.">
+  <title>Week 4 — CNN Image Classification Practice | BSDA2001</title>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(', '\\)'], ['$','$']], displayMath: [['\\[','\\]'], ['$$','$$']] }
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="script.js"></script>
+</head>
+<body>
+<!-- Primary syllabus reference: IIT Madras BSDA2001 course page, Week 4 entry.
+     Google Drive folder contents were not accessible during this preparation. -->
+<header class="site-header">
+  <div class="topbar">
+    <a class="brand" href="index.html">BSDA2001 · Deep Learning</a>
+    <nav class="site-nav" aria-label="Main navigation">
+      <a href="index.html">Introduction</a>
+      <a href="week1.html">Week 1</a>
+      <a href="week2.html">Week 2</a>
+      <a href="week3.html">Week 3</a>
+      <a href="week4.html" aria-current="page">Week 4</a>
+    </nav>
+  </div>
+  <div class="page-intro">
+    <h1>Week 4 — Modeling Vision: CNN Practice</h1>
+    <p>BSDA2001 · Introduction to Deep Learning and Generative AI · Hands-on CNN image classification</p>
+  </div>
+</header>
+
+<main class="page-layout">
+  <nav class="toc" aria-label="On this page">
+    <strong>Course weeks</strong>
+    <a href="index.html">Introduction</a>
+    <a href="week1.html">Week 1</a>
+    <a href="week2.html">Week 2</a>
+    <a href="week3.html">Week 3</a>
+    <a href="week4.html" aria-current="page">Week 4</a>
+    <hr class="sidebar-divider">
+    <strong>Week 4 study guide</strong>
+    <a href="#scope">Verified scope and sources</a>
+    <a href="#pipeline">Image-classification pipeline</a>
+    <a href="#data">Images, labels and batches</a>
+    <a href="#model">A small CNN and tensor shapes</a>
+    <a href="#training">Training with cross-entropy</a>
+    <a href="#evaluation">Evaluation and predictions</a>
+    <a href="#debugging">Common mistakes</a>
+    <a href="#practice">Additional practice</a>
+    <a href="#assignments">Assignment preparation status</a>
+    <a href="#revision">Revision checklist</a>
+  </nav>
+
+  <article class="content">
+    <section id="scope">
+      <span class="label">SOURCE-VERIFIED SCOPE</span>
+      <h2>1. What the official course page says</h2>
+      <p>The IIT Madras BSDA2001 course page lists Week 4 as <b>“Modeling Vision — CNN - Practice”</b> and describes it as hands-on CNN-based image classification, giving MNIST and CIFAR-10 as examples. This establishes the Week 4 subject and practical emphasis.</p>
+      <p>The public course page contains one Week 4 entry; it does not provide individual lecture titles, subtopic order, implementation code, or assignment questions. So this page preserves the verifiable order: the Week 4 practice block is image classification using CNNs. The study sections below unpack that task in a useful workflow; their subheading order is an explanatory study sequence, not a claimed official lecture-by-lecture sequence.</p>
+      <div class="note"><b>Source limitation:</b> the supplied slide and live-lecture Drive folders could not be opened with the available access tool. No Week 4 lecture files, notebooks, recordings, practice assignment, or graded assignment could be inspected. The PyTorch program and worked questions below are explicitly supplementary examples, not instructor-provided material or official assignment questions.</div>
+      <h3>Accessible course references</h3>
+      <ul>
+        <li><a href="https://study.iitm.ac.in/ds/course_pages/BSDA2001.html" target="_blank" rel="noopener">Official IIT Madras BSDA2001 course page</a> — source for the Week 4 title and high-level scope.</li>
+        <li><a href="https://drive.google.com/drive/folders/176kW-mbbFM0Ooo7Oga4bJ2EXgUOZQual" target="_blank" rel="noopener">Lecture slides Drive folder</a> — link provided, folder contents inaccessible here.</li>
+        <li><a href="https://drive.google.com/drive/folders/1abmqebDE6PRRRN3XiezVAGDUWoj8NcSa" target="_blank" rel="noopener">Live lecture resources Drive folder</a> — link provided, folder contents inaccessible here.</li>
+        <li><a href="week3.html">Week 3 CNN notes on this site</a> — local prerequisite review for convolution, pooling, shapes, and CNN layers. These notes are not a substitute for Week 4 source files.</li>
+      </ul>
+    </section>
+
+    <section id="pipeline">
+      <h2>2. The image-classification pipeline</h2>
+      <p><b>Image classification</b> means assigning an image to one label from a known set of classes. For example, an MNIST classifier maps a handwritten digit image to one of ten labels, 0 through 9.</p>
+      <p>A CNN classifier follows this broad computation:</p>
+      <div class="eq" role="img" aria-label="Image batch goes through convolution and pooling, then a classifier, then class scores">
+        Images and labels → CNN feature extraction → class scores (logits) → loss → parameter update
+      </div>
+      <table>
+        <thead><tr><th>Stage</th><th>What it does</th><th>Typical object</th></tr></thead>
+        <tbody>
+          <tr><td>Load and prepare</td><td>Read images and labels; turn pixels into tensors and group examples into batches.</td><td>Image tensor and integer class labels</td></tr>
+          <tr><td>Feature extraction</td><td>Convolutional layers transform local image patterns into feature maps; activations and pooling can follow.</td><td>Tensor shaped <code>(N, C, H, W)</code></td></tr>
+          <tr><td>Classification head</td><td>Convert the final features into one score per class.</td><td>Logits shaped <code>(N, K)</code></td></tr>
+          <tr><td>Learning</td><td>Compare logits with correct labels, calculate loss, backpropagate gradients and update parameters.</td><td>Scalar batch loss and updated weights</td></tr>
+          <tr><td>Evaluation</td><td>Measure predictions on held-out examples without updating parameters.</td><td>Accuracy or another metric</td></tr>
+        </tbody>
+      </table>
+      <p>Here <code>N</code> is batch size, <code>C</code> is channel count, <code>H</code> and <code>W</code> are image height and width, and <code>K</code> is number of classes. For RGB images, <code>C = 3</code>; a grayscale image has <code>C = 1</code>.</p>
+      <div class="note"><b>Connection to Week 3:</b> Week 3 introduces CNN operations and an image-classification implementation. Week 4's official label emphasizes the hands-on practice application. Review convolution and pooling shapes in <a href="week3.html#shapes">Week 3 shape revision</a> before tracing a model.</div>
+    </section>
+
+    <section id="data">
+      <h2>3. Images, labels and batches</h2>
+      <h3>3.1 Pixels become numbers</h3>
+      <p>A grayscale image of height <code>H</code> and width <code>W</code> can be represented as <code>H × W</code> pixel values. A CNN library typically expects a batch with channel-first shape <code>(N, C, H, W)</code>. For example, a batch of 32 grayscale 28 × 28 images has shape <code>(32, 1, 28, 28)</code>.</p>
+      <p>A class label is commonly an integer in <code>0</code> through <code>K-1</code>. When labels are class indices for PyTorch's <code>CrossEntropyLoss</code>, their batch shape is <code>(N,)</code> and their dtype should be integer class-index type, normally <code>torch.long</code>.</p>
+      <h3>3.2 Why use batches?</h3>
+      <p>A <b>batch</b> is a group of examples processed together. Batching makes computation efficient and produces a gradient estimate from several samples at once. If there are 60,000 training examples and batch size is 64, one epoch contains about <code>ceil(60000 / 64) = 938</code> batches; the last batch can be smaller.</p>
+      <h3>3.3 A concrete MNIST batch</h3>
+      <p>The official page names MNIST as one possible dataset example. The following is an independent PyTorch illustration of loading it; it is not a claim that this exact library or code appears in the course materials.</p>
+      <pre><code>from torch.utils.data import DataLoader
+from torchvision import datasets, transforms
+
+transform = transforms.ToTensor()
+train_data = datasets.MNIST(
+    root="./data", train=True, download=True, transform=transform
+)
+train_loader = DataLoader(
+    train_data, batch_size=64, shuffle=True
+)
+
+images, labels = next(iter(train_loader))
+print(images.shape)  # torch.Size([64, 1, 28, 28])
+print(labels.shape)  # torch.Size([64])
+print(images.dtype)  # torch.float32</code></pre>
+      <ul>
+        <li><code>ToTensor()</code> converts each image into a tensor and scales ordinary 8-bit pixel values to the range 0–1.</li>
+        <li><code>train=True</code> selects the training split; <code>download=True</code> downloads the dataset if needed.</li>
+        <li><code>batch_size=64</code> asks the loader for groups of up to 64 samples.</li>
+        <li><code>shuffle=True</code> changes the order of training examples each epoch.</li>
+        <li>The loader returns image batches and labels in matching order.</li>
+      </ul>
+      <div class="note"><b>Environment note:</b> this snippet requires PyTorch and torchvision, and the first run requires network access to download MNIST. Its output shape is determined by the requested batch and MNIST image dimensions.</div>
+    </section>
+
+    <section id="model">
+      <h2>4. Supplementary worked model: a small CNN</h2>
+      <p>This compact example uses two convolution and pooling stages followed by a linear classifier. It is chosen to make the image-to-logits path and dimensions explicit. It is a supplementary model, not a recovered Week 4 instructor architecture.</p>
+      <h3>4.1 Layer-by-layer shape calculation</h3>
+      <p>For a 2D convolution, the output height (and likewise width) is</p>
+      <div class="eq">\[H_{out}=\left\lfloor\frac{H_{in}+2P-D(K-1)-1}{S}+1\right\rfloor\]</div>
+      <p><code>H<sub>in</sub></code> is input height, <code>K</code> kernel size, <code>P</code> padding, <code>D</code> dilation, and <code>S</code> stride. Here we use kernel 3, padding 1, dilation 1, stride 1; therefore height and width stay the same. A 2 × 2 max-pool with stride 2 halves each even spatial dimension.</p>
+      <table>
+        <thead><tr><th>Operation</th><th>Calculation</th><th>Output shape</th></tr></thead>
+        <tbody>
+          <tr><td>Input batch</td><td>64 grayscale 28 × 28 images</td><td><code>(64, 1, 28, 28)</code></td></tr>
+          <tr><td>Conv2d: 1 → 16 channels, 3 × 3, padding 1</td><td>Spatial size preserved</td><td><code>(64, 16, 28, 28)</code></td></tr>
+          <tr><td>MaxPool2d: 2 × 2, stride 2</td><td>28 ÷ 2 = 14</td><td><code>(64, 16, 14, 14)</code></td></tr>
+          <tr><td>Conv2d: 16 → 32 channels, 3 × 3, padding 1</td><td>Spatial size preserved</td><td><code>(64, 32, 14, 14)</code></td></tr>
+          <tr><td>MaxPool2d: 2 × 2, stride 2</td><td>14 ÷ 2 = 7</td><td><code>(64, 32, 7, 7)</code></td></tr>
+          <tr><td>Flatten each image</td><td>32 × 7 × 7 = 1,568 features</td><td><code>(64, 1568)</code></td></tr>
+          <tr><td>Linear classifier</td><td>One score for each of 10 digits</td><td><code>(64, 10)</code></td></tr>
+        </tbody>
+      </table>
+      <h3>4.2 Model code and parameter counts</h3>
+      <pre><code>import torch
+from torch import nn
+
+class SmallCNN(nn.Module):
+    def __init__(self, num_classes=10):
+        super().__init__()
+        self.features = nn.Sequential(
+            nn.Conv2d(1, 16, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+            nn.Conv2d(16, 32, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+        )
+        self.classifier = nn.Linear(32 * 7 * 7, num_classes)
+
+    def forward(self, x):
+        x = self.features(x)       # (N, 32, 7, 7)
+        x = torch.flatten(x, 1)    # (N, 1568); keep batch dimension
+        return self.classifier(x)  # (N, num_classes), raw logits
+
+model = SmallCNN()
+sample = torch.zeros(4, 1, 28, 28)
+print(model(sample).shape)  # torch.Size([4, 10])</code></pre>
+      <p><code>nn.Conv2d(1, 16, ...)</code> accepts one grayscale input channel and learns 16 filters. ReLU adds a nonlinear transformation. Pooling reduces the spatial dimensions. The second convolution learns 32 output channels from the 16 input channels. <code>torch.flatten(x, 1)</code> combines channel, height, and width dimensions while retaining batch dimension zero. The final linear layer produces ten raw scores, one per class.</p>
+      <p>With biases enabled, a convolution has <code>(input channels × kernel height × kernel width + 1) × output channels</code> parameters. The first convolution has <code>(1×3×3+1)×16 = 160</code>; the second has <code>(16×3×3+1)×32 = 4,640</code>. The classifier has <code>(1,568+1)×10 = 15,690</code>. Total: <b>20,490 trainable parameters</b>.</p>
+      <div class="note"><b>Check before training:</b> run one synthetic batch through the model and confirm the output is <code>(N, 10)</code>. This catches many flattening and fully connected input-size mistakes before a full epoch.</div>
+    </section>
+
+    <section id="training">
+      <h2>5. Supplementary training loop</h2>
+      <h3>5.1 Logits, labels and cross-entropy</h3>
+      <p><b>Logits</b> are unnormalized class scores from the model. For multiclass classification, <code>CrossEntropyLoss</code> takes logits of shape <code>(N, K)</code> and integer class targets of shape <code>(N,)</code>. It applies the needed log-softmax calculation internally, so do not add a softmax layer before this loss.</p>
+      <p>For one example with true class <code>y</code> and logits <code>z</code>, cross-entropy can be written as</p>
+      <div class="eq">\[\ell(z,y)=-\log\left(\frac{e^{z_y}}{\sum_{j=1}^{K}e^{z_j}}\right)\]</div>
+      <p><code>z<sub>j</sub></code> is the score for class <code>j</code>, <code>z<sub>y</sub></code> is the true-class score, and <code>K</code> is the number of classes. Higher probability assigned to the true class means lower loss.</p>
+      <h3>5.2 Complete training and evaluation example</h3>
+      <pre><code>import torch
+from torch import nn
+from torch.optim import Adam
+from torch.utils.data import DataLoader
+from torchvision import datasets, transforms
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+transform = transforms.ToTensor()
+train_data = datasets.MNIST("./data", train=True, download=True, transform=transform)
+test_data = datasets.MNIST("./data", train=False, download=True, transform=transform)
+train_loader = DataLoader(train_data, batch_size=64, shuffle=True)
+test_loader = DataLoader(test_data, batch_size=256, shuffle=False)
+
+model = SmallCNN().to(device)
+loss_fn = nn.CrossEntropyLoss()
+optimizer = Adam(model.parameters(), lr=1e-3)
+
+for epoch in range(3):
+    model.train()
+    total_loss = 0.0
+    total_seen = 0
+    for images, labels in train_loader:
+        images, labels = images.to(device), labels.to(device)
+        optimizer.zero_grad()
+        logits = model(images)
+        loss = loss_fn(logits, labels)
+        loss.backward()
+        optimizer.step()
+        total_loss += loss.item() * labels.size(0)
+        total_seen += labels.size(0)
+    print(f"epoch {epoch + 1}: train loss {total_loss / total_seen:.4f}")
+
+model.eval()
+correct = 0
+total = 0
+with torch.no_grad():
+    for images, labels in test_loader:
+        images, labels = images.to(device), labels.to(device)
+        logits = model(images)
+        predictions = logits.argmax(dim=1)
+        correct += (predictions == labels).sum().item()
+        total += labels.size(0)
+print(f"test accuracy: {correct / total:.2%}")</code></pre>
+      <h3>5.3 What each training step does</h3>
+      <ol>
+        <li><code>model.train()</code> selects training behavior for layers that distinguish train and evaluation modes.</li>
+        <li>Move both images and labels to the same device as the model.</li>
+        <li><code>optimizer.zero_grad()</code> clears gradients left from the previous batch.</li>
+        <li>The forward pass produces logits; the loss compares them with the correct labels.</li>
+        <li><code>loss.backward()</code> computes parameter gradients using backpropagation.</li>
+        <li><code>optimizer.step()</code> changes model parameters using those gradients.</li>
+        <li>For reporting an epoch mean, multiply each mean batch loss by its sample count before summing, then divide by total samples. This handles a smaller final batch correctly.</li>
+      </ol>
+      <p>The example runs three epochs for demonstration; that number is not a course prescription. Exact accuracy and loss depend on software versions, random initialization, hardware, and training settings, so no particular numerical result is promised here.</p>
+      <div class="note"><b>Evaluation:</b> <code>model.eval()</code> changes layer behavior where relevant; <code>torch.no_grad()</code> prevents gradient storage. The test loader is not shuffled because stable order is convenient for evaluation. Evaluation must not call <code>backward()</code> or <code>optimizer.step()</code>.</div>
+    </section>
+
+    <section id="evaluation">
+      <h2>6. Reading predictions and evaluation</h2>
+      <p>For logits shaped <code>(N, K)</code>, <code>argmax(dim=1)</code> selects the largest-scoring class in each row, returning one predicted class index per image. Accuracy is the fraction of examples predicted correctly:</p>
+      <div class="eq">\[\text{accuracy}=\frac{\text{number of correct predictions}}{\text{number of evaluated examples}}\]</div>
+      <p>For example, 87 correct predictions among 100 images gives <code>87 / 100 = 0.87</code>, or 87% accuracy. Accuracy is easy to read, but it does not show which classes are confused or whether errors are concentrated in a minority class. A confusion matrix can help inspect class-by-class mistakes.</p>
+      <h3>One-batch shape trace</h3>
+      <table>
+        <thead><tr><th>Value</th><th>Shape</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td><code>images</code></td><td><code>(64, 1, 28, 28)</code></td><td>64 grayscale images</td></tr>
+          <tr><td><code>labels</code></td><td><code>(64,)</code></td><td>64 integer target classes</td></tr>
+          <tr><td><code>logits</code></td><td><code>(64, 10)</code></td><td>Ten class scores for each image</td></tr>
+          <tr><td><code>predictions</code></td><td><code>(64,)</code></td><td>One predicted class index per image</td></tr>
+          <tr><td><code>loss</code></td><td>scalar</td><td>Mean loss over the batch by default</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="debugging">
+      <h2>7. Common mistakes and debugging checks</h2>
+      <table>
+        <thead><tr><th>Symptom</th><th>Likely cause</th><th>Check or fix</th></tr></thead>
+        <tbody>
+          <tr><td>Conv2d expects 4D input</td><td>Missing batch or channel dimension.</td><td>Print image shape; use <code>(N,C,H,W)</code>. A single grayscale image needs <code>(1,1,H,W)</code> as a batch.</td></tr>
+          <tr><td>Expected 1 channel, got 3 (or vice versa)</td><td>Model's first convolution does not match image channels.</td><td>Set <code>in_channels</code> to the dataset channel count: 1 for grayscale or 3 for RGB.</td></tr>
+          <tr><td>Matrix multiplication shape error at Linear</td><td>Incorrect flattened feature count.</td><td>Trace each spatial operation and calculate <code>C×H×W</code>; test a dummy batch through the feature extractor.</td></tr>
+          <tr><td>CrossEntropyLoss target shape/type error</td><td>One-hot targets or wrong dtype used for class-index loss.</td><td>For this setup, use logits <code>(N,K)</code> and labels <code>(N,)</code> with integer class indices.</td></tr>
+          <tr><td>“Expected all tensors on same device”</td><td>Model, images, or labels are on different devices.</td><td>Move model, batch inputs, and targets to the same <code>device</code>.</td></tr>
+          <tr><td>Loss becomes NaN or training is unstable</td><td>Possible non-finite inputs, overly aggressive learning rate, or numerical issue.</td><td>Check <code>torch.isfinite(images).all()</code>, print loss and learning rate, and reduce learning rate if needed.</td></tr>
+          <tr><td>Evaluation unexpectedly changes weights</td><td>Training code was reused during evaluation.</td><td>Use <code>model.eval()</code> and <code>torch.no_grad()</code>; do not step the optimizer.</td></tr>
+        </tbody>
+      </table>
+      <p>Useful debugging habit: print shapes at the boundaries between data, feature extractor, flatten operation, and classifier. Shape errors are easier to locate when the last correct shape is known.</p>
+    </section>
+
+    <section id="practice">
+      <h2>8. Additional practice questions</h2>
+      <p>These are newly written study questions based on the verified broad Week 4 image-classification scope and the supplementary example above. They are not taken from an official practice or graded assignment.</p>
+      <details><summary>Question 1 — What is the output shape for a batch of 20 RGB images of size 32 × 32 entering <code>Conv2d(3, 12, 3, padding=1)</code>?</summary><div class="answer"><b>Answer:</b> <code>(20, 12, 32, 32)</code>. Batch size remains 20, output channels become 12, and kernel size 3 with padding 1 and stride 1 preserves height and width.</div></details>
+      <details><summary>Question 2 — A batch contains 50 examples. What are the expected shapes for 10-class logits and integer class-index labels?</summary><div class="answer"><b>Answer:</b> logits <code>(50, 10)</code>, labels <code>(50,)</code>. Each row of logits corresponds to one label.</div></details>
+      <details><summary>Question 3 — The true class is 4. Why should a ten-class model return ten scores rather than applying argmax before the loss?</summary><div class="answer"><b>Answer:</b> the loss needs all class scores to measure how probability mass is distributed and provide useful gradients. Argmax discards score magnitudes and is used after the forward pass for class prediction, not before cross-entropy training.</div></details>
+      <details><summary>Question 4 — A model predicts 42 of 50 test images correctly. Calculate accuracy.</summary><div class="answer"><b>Worked answer:</b> <code>42 / 50 = 0.84</code>, so accuracy is 84%.</div></details>
+      <details><summary>Question 5 — A flattened feature tensor has 1,568 values per image and the classifier has 10 output units. How many weights and biases does the linear layer have?</summary><div class="answer"><b>Worked answer:</b> weights: <code>1,568 × 10 = 15,680</code>. There is one bias per output unit, so 10 biases. Total: <code>15,690</code> parameters.</div></details>
+      <details><summary>Question 6 — Name the correct evaluation changes to the training loop.</summary><div class="answer"><b>Answer:</b> call <code>model.eval()</code>, evaluate inside <code>torch.no_grad()</code>, calculate predictions/metrics, and do not call <code>loss.backward()</code> or <code>optimizer.step()</code>.</div></details>
+      <details><summary>Question 7 — Debug: MNIST batches have shape <code>(64, 1, 28, 28)</code>, but the model's first convolution is <code>Conv2d(3, 16, 3)</code>. What is wrong?</summary><div class="answer"><b>Answer:</b> the layer expects three channels while the batch has one grayscale channel. Set the first convolution's input channels to 1, or use a three-channel dataset/transform consistently.</div></details>
+    </section>
+
+    <section id="assignments">
+      <h2>9. Practice and graded-assignment preparation</h2>
+      <p>No Week 4 practice-assignment or graded-assignment files were accessible in the supplied Drive folders or present in the local project. Therefore this page does not claim to know their questions, tested details, or format.</p>
+      <h3>Prepare from the verified course scope</h3>
+      <ol>
+        <li>Be able to describe how a labeled image batch passes through a CNN to class logits.</li>
+        <li>Read tensor shapes in channel-first order and track them through convolution, pooling, flattening, and classification layers.</li>
+        <li>Match class-index targets with the expected loss inputs; distinguish logits from final predicted labels.</li>
+        <li>Explain the training-step order: clear gradients, forward pass, loss, backward pass, optimizer update.</li>
+        <li>Explain how evaluation differs from training and calculate accuracy from counts.</li>
+        <li>Use the additional questions above as practice only; check official course materials for assignment-specific conventions and requirements.</li>
+      </ol>
+      <div class="note"><b>Assignment source gap:</b> share or enable access to the Week 4 practice and graded assignment files to add source-matched preparation. Actual graded assessment questions and answers have not been reproduced here.</div>
+    </section>
+
+    <section id="revision">
+      <h2>10. Final revision checklist</h2>
+      <ul>
+        <li>Official scope: Week 4 is the CNN practice week, with hands-on image classification; MNIST and CIFAR-10 are examples named on the public course page.</li>
+        <li>For a batch, CNN images generally use shape <code>(N,C,H,W)</code>; class-index targets use <code>(N,)</code>.</li>
+        <li>Track channel and spatial dimensions through each layer; flatten only after convolutional feature extraction and preserve the batch dimension.</li>
+        <li>A multiclass classifier returns one logit per class. Cross-entropy receives raw logits and integer class labels in the illustrated setup.</li>
+        <li>Training uses gradients and optimizer updates; evaluation uses <code>eval()</code> and <code>no_grad()</code> without updates.</li>
+        <li>Accuracy is correct predictions divided by evaluated examples; inspect class-specific errors when aggregate accuracy is not enough.</li>
+        <li>The detailed PyTorch code and question set on this page are supplementary; verify course-specific framework choices, lecture order, and assignment requirements from official files.</li>
+      </ul>
+      <div class="page-links">
+        <a class="page-link" href="week3.html">← Review Week 3: CNN foundations</a>
+        <a class="page-link" href="index.html">Back to course home →</a>
+      </div>
+    </section>
+  </article>
+</main>
+
+<footer class="site-footer">IIT Madras BS Data Science · BSDA2001 · Week 4 study notes</footer>
+</body>
+</html>
