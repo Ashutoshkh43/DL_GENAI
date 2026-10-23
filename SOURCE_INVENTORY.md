@@ -1,23 +1,35 @@
-# BSDA2001 source inventory
+# Source inventory — DL_GENAI notes
 
-Checked 2026-10-23 in `/home/ashutosh_khatiwada/dlgenai`.
+The website was expanded using the two uploaded course-resource archives and the existing `DL_GENAI-main` website archive.
 
-## Requested primary sources
+## Week 1
+- `Week1/intro_to_PyTorch_part1.ipynb` — tensor creation/manipulation, data loaders, batching and shuffling.
+- `Week1/intro_to_PyTorch_part2.ipynb` — PyTorch models, linear regression, MLP classification, evaluation and saving/loading.
+- `Week1/Module1_Live_Coding_Session.ipynb` and `Week1/Module1_ANN_Recap_Slides.pdf` — ANN recap, tensors, XOR and Fashion-MNIST workflow.
+- `Week - 1 & 2/Pytorch Fundamentals.ipynb` and `Pytorch Workflow.ipynb` — supplementary fundamentals and training workflow.
+- `Week - 1 & 2/XOR Problem.ipynb`, `Fashion MNIST Classification.ipynb`, and ANN lecture slides.
 
-| Source | Week/topic mapping | Access result |
-|---|---|---|
-| [Lecture slides Drive folder](https://drive.google.com/drive/folders/176kW-mbbFM0Ooo7Oga4bJ2EXgUOZQual) | Cannot enumerate | The web access tool returned “URL … is not accessible via this tool.” No connected Drive file integration was available. Files, permissions, and login requirements could not be inspected. |
-| [Live lecture resources Drive folder](https://drive.google.com/drive/folders/1abmqebDE6PRRRN3XiezVAGDUWoj8NcSa) | Cannot enumerate | The web access tool returned “URL … is not accessible via this tool.” No connected Drive file integration was available. Files, permissions, and login requirements could not be inspected. |
+## Week 2
+- `Week2/Week2_Churn_Live_Coding.ipynb` and `Week2/Week2_Churn_Refresher_Slides.pdf` — churn data preparation, binary classification, imbalance, evaluation and model saving.
+- `Week2/GenAI Week 2.pdf` and `Week - 1 & 2/Customer Churn Prediction.ipynb` — loss, gradient descent, forward/backpropagation and applied classification.
+- `Week - 1 & 2/XOR Problem.ipynb` and `Fashion MNIST Classification.ipynb` provide additional practice contexts.
 
-## Local project files
+## Week 3
+- `Week3/Week3_CNN_Live_Coding.ipynb`, `Week3/Basic_CNN_Demo.ipynb`, `Week3/Week3_CNN_Refresher_Slides.pdf`, and `Week3/GenAI_Week_3.pdf`.
+- `Week - 3 & 4/CNN_Fundamentals.ipynb` — convolution, weight sharing, pooling, CNN architecture, Fashion-MNIST training and filter/feature-map visualisation.
 
-No lecture PDFs, slide decks, notebooks, transcripts, or assignment source files were found in the project file listing. The existing pages are student-note content, not source files, and cannot independently verify official sequence or examples.
+## Week 4
+- `Week4/Week4_TransferLearning_UNet.ipynb` — EfficientNet-B0 transfer learning on FoodVision Mini, then U-Net segmentation using Oxford-IIIT Pet masks.
+- `Week4/Week4_TransferLearning_Slides.pdf` — transfer-learning motivation and segmentation/U-Net overview.
+- `Week4/Transfer_Learning_TA_Session.ipynb` — AlexNet, VGGNet, ResNet, feature extraction and fine-tuning.
+- `Week4/transfer_learning_dlgenai.ipynb` — CIFAR-10 classification and CNN experiments.
+- `Week - 3 & 4/Transfer_Learning.ipynb` and `Image_Segmentation_UNET.ipynb` — supplementary implementations.
 
-| Local file | Existing coverage | Source status |
-|---|---|---|
-| `week1.html` | Neural-network foundations, activations, tensors/PyTorch, linear regression, training and practice | Existing notes retained; official Week 1 alignment unverified |
-| `week2.html` | Forward pass, losses, optimization, backpropagation, XOR, churn/Fashion MNIST and practice | Existing notes retained; official Week 2 alignment unverified |
-| `week3.html` | Vision/CNN concepts, PyTorch, image classification, training and practice | Existing notes retained; user-supplied checklist is present; official slides/live examples unverified |
-| `week4.html` | Source access status and files needed | No guessed syllabus or invented lecture material |
+## Notes about accuracy
+- The notes explain and expand the supplied source topics; they are not verbatim transcripts.
+- The Week 4 practice questions are newly written revision questions. The uploaded archives did not include a clearly identifiable separate Week 4 graded-assignment question sheet.
+- Run the original notebooks in their intended environment for complete executable experiments; the website code snippets are teaching examples and may need dataset paths/dependencies.
 
-**Next step for source-grounded completion:** provide folder access to the browsing/integration environment or download the relevant files into this project, preserving filenames. Then map each file to the official week and topic sequence before revising the notes.
+
+https://drive.google.com/drive/folders/1abmqebDE6PRRRN3XiezVAGDUWoj8NcSa
+https://drive.google.com/drive/folders/176kW-mbbFM0Ooo7Oga4bJ2EXgUOZQual
