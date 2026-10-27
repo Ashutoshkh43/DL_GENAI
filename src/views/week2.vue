@@ -1,83 +1,9 @@
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Detailed Week 2 notes for BSDA2001 Introduction to Deep Learning and Generative AI, including forward propagation, loss functions, gradient descent, backpropagation, XOR, customer churn, and Fashion MNIST.">
-
-  <title>Week 2 — Training Neural Networks | BSDA2001</title>
-
-  <script>
-    window.MathJax = {
-      tex: {
-        inlineMath: [['\\(', '\\)'], ['$', '$']],
-        displayMath: [['\\[', '\\]'], ['$$', '$$']]
-      }
-    };
-  </script>
-  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
-
-  <link rel="stylesheet" href="styles.css">
-  <script defer src="script.js"></script>
-</head>
-
-<body>
-
-<header class="site-header">
-  <div class="topbar">
-    <a class="brand" href="index.html">BSDA2001 · Deep Learning</a>
-    <nav class="site-nav" aria-label="Main navigation">
-      <a href="index.html">Introduction</a>
-      <a href="week1.html">Week 1</a>
-      <a aria-current="page" href="week2.html">Week 2</a>
-      <a href="week3.html">Week 3</a>
-      <a href="week4.html">Week 4</a>
-    </nav>
-  </div>
-
-  <div class="page-intro">
-    <h1>Week 2 — Training Neural Networks</h1>
-    <p>
-      Understand how neural networks make predictions, measure their errors,
-      update their weights, and learn from data. These concept-based notes
-      cover the Universal Approximation Theorem, forward propagation,
-      loss functions, gradient descent, backpropagation, XOR, customer churn,
-      and Fashion MNIST classification.
-    </p>
-  </div>
-
-</header>
+<template>
+<SiteHeader page="week2" />
 
 <main class="page-layout">
 
-  <nav class="toc" aria-label="On this page">
-    <strong>Course weeks</strong>
-    <a href="index.html">Introduction</a>
-    <a href="week1.html">Week 1</a>
-    <a href="week2.html" aria-current="page">Week 2</a>
-    <a href="week3.html">Week 3</a>
-    <a href="week4.html">Week 4</a>
-    <hr class="sidebar-divider">
-    <strong>Week 2 topics</strong>
-    <a href="#big-picture">1. Big picture</a>
-    <a href="#uat">2. Universal Approximation Theorem</a>
-    <a href="#forward-pass">3. Forward pass</a>
-    <a href="#loss">4. Loss functions</a>
-    <a href="#gradient-descent">5. Gradient descent</a>
-    <a href="#churn">6. Customer churn prediction</a>
-    <a href="#backprop">7. Backpropagation</a>
-    <a href="#xor">8. XOR problem</a>
-    <a href="#fashion-overview">9. Fashion MNIST</a>
-    <a href="#fashion-model">10. Fashion MNIST MLP</a>
-    <a href="#fashion-forward">11. Fashion MNIST forward pass</a>
-    <a href="#fashion-training">12. Training loop</a>
-    <a href="#ga2">13. Graded Assignment 2 practice</a>
-    <a href="#fashion-validation">14. Validation loop</a>
-    <a href="#model-training">15. Model training and evaluation</a>
-    <a href="#formula-sheet">16. Formula sheet</a>
-    <a href="#practice2">17. Practice Assignment 2</a>
-  </nav>
+  <CourseSidebar page="week2" />
 
   <article class="content">
 
@@ -2706,9 +2632,16 @@ if torch.cuda.is_available():
 
 <footer class="site-footer">
   <p>BSDA2001 · Introduction to Deep Learning and Generative AI</p>
-  <p><a href="index.html">Back to course notes</a> · <a href="week1.html">Week 1</a></p>
+  <p><a href="/">Back to course notes</a> · <a href="/week1">Week 1</a></p>
   <p>Study notes and original practice examples. Refer to the official course portal for authoritative assignment instructions.</p>
 </footer>
+</template>
 
-</body>
-</html>
+<script>
+import SiteHeader from '../components/SiteHeader.vue';
+import CourseSidebar from '../components/CourseSidebar.vue';
+
+export default {
+  components: { SiteHeader, CourseSidebar },
+};
+</script>

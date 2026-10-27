@@ -1,56 +1,11 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="First-year-friendly BSDA2001 notes for Introduction to Deep Learning and Generative AI.">
-  <title>Introduction to Deep Learning &amp; Generative AI | BSDA2001</title>
-  <script>
-    window.MathJax = {
-      tex: {
-        inlineMath: [['\\(', '\\)'], ['$','$']],
-        displayMath: [['\\[','\\]'], ['$$','$$']]
-      }
-    };
-  </script>
-  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
-  <link rel="stylesheet" href="styles.css">
-  <script defer src="script.js"></script>
-</head>
-<body>
-  <header class="site-header">
-    <div class="topbar">
-      <a class="brand" href="index.html">BSDA2001 · Deep Learning</a>
-      <nav class="site-nav" aria-label="Main navigation">
-        <a href="index.html" aria-current="page">Introduction</a>
-        <a href="week1.html">Week 1</a>
-        <a href="week2.html">Week 2</a>
-        <a href="week3.html">Week 3</a>
-        <a href="week4.html">Week 4</a>
-      </nav>
-    </div>
-    <div class="page-intro">
-      <h1>Introduction to Deep Learning &amp; Generative AI</h1>
-      <p>Course guide and conceptual roadmap · Begin here before studying the weekly notes.</p>
-    </div>
-  </header>
+<template>
+<SiteHeader page="index" />
   <main class="page-layout">
-    <nav class="toc" aria-label="On this page">
-      <strong>Course weeks</strong>
-      <a href="index.html" aria-current="page">Introduction</a>
-      <a href="week1.html">Week 1</a>
-      <a href="week2.html">Week 2</a>
-      <a href="week3.html">Week 3</a>
-      <a href="week4.html">Week 4</a>
-      <hr class="sidebar-divider">
-      <strong>On this page</strong>
-      <a href="#how-to-use-these-notes">How to use these notes</a>
-      <a href="#before-neural-networks-from-machine-learning-to-deep-learning">Before neural networks: from machine learning to deep learning</a>
-    </nav>
+    <CourseSidebar page="index" />
     <article class="content">
       <div class="page-links">
-        <a class="page-link" href="week1.html">Start Week 1: Foundations →</a>
-        <a class="page-link" href="week2.html">Continue to Week 2: Training &amp; Practice →</a>
+        <a class="page-link" href="/week1">Start Week 1: Foundations →</a>
+        <a class="page-link" href="/week2">Continue to Week 2: Training &amp; Practice →</a>
       </div>
       <section id="how-to-use-these-notes">
         <div>
@@ -79,10 +34,12 @@
         <h3>Traditional machine learning and feature engineering</h3>
         <p>A <b>feature</b> is a measurable input used by a model, such as house area, number of rooms, or a pixel value. <b>Feature engineering</b> means humans choose or construct useful inputs before model training. In traditional workflows, domain experts may need to design these features carefully.</p>
         <table>
-          <tr><th>Approach</th><th>Typical idea</th><th>Strength / limitation</th></tr>
-          <tr><td>Linear models</td><td>Learn a weighted combination of features</td><td>Fast and interpretable, but limited for complex patterns</td></tr>
-          <tr><td>Tree-based models</td><td>Learn a sequence of if/then splits</td><td>Powerful for structured/tabular data</td></tr>
-          <tr><td>Deep learning</td><td>Learn layers of representations from data</td><td>Useful for complex images, audio, text, and other high-dimensional inputs; often needs more data and computation</td></tr>
+          <tbody>
+            <tr><th>Approach</th><th>Typical idea</th><th>Strength / limitation</th></tr>
+            <tr><td>Linear models</td><td>Learn a weighted combination of features</td><td>Fast and interpretable, but limited for complex patterns</td></tr>
+            <tr><td>Tree-based models</td><td>Learn a sequence of if/then splits</td><td>Powerful for structured/tabular data</td></tr>
+            <tr><td>Deep learning</td><td>Learn layers of representations from data</td><td>Useful for complex images, audio, text, and other high-dimensional inputs; often needs more data and computation</td></tr>
+          </tbody>
         </table>
         <p>Traditional ML can struggle when raw inputs are very large, such as every pixel in an image, because manually designing the right features is difficult. Deep learning can learn simple features first and combine them into more complex features in later layers. This is called <b>representation learning</b>.</p>
         <div class="note"><b>Connection to the next topic:</b> A neural network is a function that transforms input features into an output. The next sections build this function from its smallest component: a neuron.</div>
@@ -90,5 +47,13 @@
     </article>
   </main>
   <footer class="site-footer">IIT Madras BS Data Science · Introduction to Deep Learning and Generative AI (BSDA2001)<br>Study the concepts in sequence, work through the equations, and run the code examples to connect theory with practice.</footer>
-</body>
-</html>
+</template>
+
+<script>
+import SiteHeader from '../components/SiteHeader.vue';
+import CourseSidebar from '../components/CourseSidebar.vue';
+
+export default {
+  components: { SiteHeader, CourseSidebar },
+};
+</script>

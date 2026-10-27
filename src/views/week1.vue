@@ -1,78 +1,8 @@
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Detailed concept-based BSDA2001 Week 1 notes covering neural networks, PyTorch, tensors, linear regression and GA practice.">
-  <title>Week 1 — Deep Learning Foundations | BSDA2001</title>
-  <script>
-    window.MathJax = {
-      tex: {
-        inlineMath: [['\\(', '\\)'], ['$', '$']],
-        displayMath: [['\\[', '\\]'], ['$$', '$$']]
-      }
-    };
-  </script>
-  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
-  <link rel="stylesheet" href="styles.css">
-  <script defer src="script.js"></script>
-</head>
-<body>
-<header class="site-header">
-  <div class="topbar">
-    <a class="brand" href="index.html">BSDA2001 · Deep Learning</a>
-    <nav class="site-nav" aria-label="Main navigation">
-      <a href="index.html">Introduction</a>
-      <a href="week1.html" aria-current="page">Week 1</a>
-      <a href="week2.html">Week 2</a>
-      <a href="week3.html">Week 3</a>
-      <a href="week4.html">Week 4</a>
-    </nav>
-  </div>
-  <div class="page-intro">
-    <h1>Week 1 — Foundations of Deep Learning</h1>
-    <p>
-      Detailed concept-based notes covering artificial neural networks,
-      PyTorch tensors, linear regression, training, model serialization,
-      feedforward networks and activation functions. Includes worked
-      examples, common errors and practice questions modelled on typical
-      GA-style formats.
-    </p>
-  </div>
-</header>
+<template>
+<SiteHeader page="week1" />
 
 <main class="page-layout">
-  <nav class="toc" aria-label="On this page">
-    <strong>Course weeks</strong>
-    <a href="index.html">Introduction</a>
-    <a href="week1.html" aria-current="page">Week 1</a>
-    <a href="week2.html">Week 2</a>
-    <a href="week3.html">Week 3</a>
-    <a href="week4.html">Week 4</a>
-    <hr class="sidebar-divider">
-    <strong>Week 1 topics</strong>
-    <a href="#big-picture">Big picture</a>
-    <a href="#ann">Artificial neural networks</a>
-    <a href="#neuron">The mathematical neuron</a>
-    <a href="#architecture">Network architecture</a>
-    <a href="#activations">Activation functions</a>
-    <a href="#tensors">PyTorch and tensors</a>
-    <a href="#tensor-creation">Tensor creation</a>
-    <a href="#tensor-operations">Tensor manipulation</a>
-    <a href="#reshape-index">Reshaping and indexing</a>
-    <a href="#numpy">PyTorch and NumPy</a>
-    <a href="#reproducibility">Reproducibility</a>
-    <a href="#hardware">CPU and GPU</a>
-    <a href="#errors">Common errors</a>
-    <a href="#linear-regression">Linear regression</a>
-    <a href="#training">Loss and training loop</a>
-    <a href="#serialization">Saving and loading</a>
-    <a href="#tricks">Practical training techniques</a>
-    <a href="#ga-practice">GA and practice questions</a>
-    <a href="#assignments">Assignment placement</a>
-    <a href="#revision">Formula sheet and self-test</a>
-  </nav>
+  <CourseSidebar page="week1" />
 
   <article class="content">
 
@@ -1105,5 +1035,13 @@ restored_model.eval()</code></pre>
   IIT Madras BS Data Science · BSDA2001
   <br>Week 1: neural networks, PyTorch, tensors and training fundamentals.
 </footer>
-</body>
-</html>
+</template>
+
+<script>
+import SiteHeader from '../components/SiteHeader.vue';
+import CourseSidebar from '../components/CourseSidebar.vue';
+
+export default {
+  components: { SiteHeader, CourseSidebar },
+};
+</script>

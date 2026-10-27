@@ -1,40 +1,7 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Detailed BSDA2001 Week 4 notes based on the supplied lecture slides and notebooks: transfer learning, pretrained CNNs, fine-tuning and U-Net image segmentation.">
-  <title>Week 4 — Transfer Learning &amp; Image Segmentation | BSDA2001</title>
-  <script>
-    window.MathJax = {
-      tex: { inlineMath: [['\\(','\\)'], ['$','$']], displayMath: [['\\[','\\]'], ['$$','$$']] }
-    };
-  </script>
-  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
-  <link rel="stylesheet" href="styles.css">
-  <script defer src="script.js"></script>
-</head>
-<body>
-<header class="site-header">
-  <div class="topbar">
-    <a class="brand" href="index.html">BSDA2001 · Deep Learning</a>
-    <nav class="site-nav" aria-label="Main navigation">
-      <a href="index.html">Introduction</a><a href="week1.html">Week 1</a><a href="week2.html">Week 2</a><a href="week3.html">Week 3</a><a href="week4.html" aria-current="page">Week 4</a>
-    </nav>
-  </div>
-  <div class="page-intro">
-    <h1>Week 4 — Transfer Learning &amp; Image Segmentation</h1>
-    <p>BSDA2001 · Introduction to Deep Learning and Generative AI. Reuse pretrained visual features, adapt a CNN to a new label set, and learn how U-Net predicts a mask for every pixel.</p>
-  </div>
-</header>
+<template>
+<SiteHeader page="week4" />
 <main class="page-layout">
-  <nav class="toc" aria-label="On this page">
-    <strong>Course weeks</strong>
-    <a href="index.html">Introduction</a><a href="week1.html">Week 1</a><a href="week2.html">Week 2</a><a href="week3.html">Week 3</a><a href="week4.html" aria-current="page">Week 4</a>
-    <hr class="sidebar-divider">
-    <strong>Week 4 topics</strong>
-    <a href="#scope">Scope and learning goals</a><a href="#recap">Why move beyond a CNN from scratch?</a><a href="#architectures">CNN architecture evolution</a><a href="#transfer">Transfer learning</a><a href="#strategies">Feature extraction vs fine-tuning</a><a href="#efficientnet">EfficientNet-B0 example</a><a href="#preprocessing">Preprocessing and DataLoaders</a><a href="#training">Training and evaluation</a><a href="#segmentation">Image segmentation</a><a href="#unet">U-Net architecture</a><a href="#masks">Masks, loss and Dice score</a><a href="#unet-code">U-Net implementation pattern</a><a href="#debugging">Debugging checklist</a><a href="#comparison">Classification vs segmentation</a><a href="#practice">Practice questions</a><a href="#revision">Revision sheet</a><a href="#sources">Supplied source materials</a>
-  </nav>
+  <CourseSidebar page="week4" />
   <article class="content">
     <section id="scope">
       <section>
@@ -528,5 +495,13 @@ print("outputs", outputs.shape, outputs.dtype)</code></pre>
   </article>
 </main>
 <footer class="site-footer">IIT Madras BS Data Science · BSDA2001 — Introduction to Deep Learning and Generative AI<br>Study the source-aligned topics, run the notebooks, and verify tensor shapes on a real batch.</footer>
-</body>
-</html>
+</template>
+
+<script>
+import SiteHeader from '../components/SiteHeader.vue';
+import CourseSidebar from '../components/CourseSidebar.vue';
+
+export default {
+  components: { SiteHeader, CourseSidebar },
+};
+</script>
