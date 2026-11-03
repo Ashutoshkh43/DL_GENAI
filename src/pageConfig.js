@@ -14,9 +14,15 @@ export const pageConfig = {
       }
     ]
   },
+  "GAs": {
+    "title": "Graded Assignments",
+    "description": "Week-wise assignment questions, answers, and worked explanations.",
+    "tocTitle": "Assignment weeks",
+    "topics": []
+  },
   "week1": {
     "title": "Week 1 — Foundations of Deep Learning",
-    "description": "Detailed concept-based notes covering artificial neural networks, PyTorch tensors, linear regression, training, model serialization, feedforward networks and activation functions. Includes worked examples, common errors and practice questions modelled on typical GA-style formats.",
+    "description": "Detailed lecture-replacement notes on neural networks, activations, PyTorch and training, with the supplied Week 1 graded assignment and a fully explained 42-question mock bank.",
     "tocTitle": "Week 1 topics",
     "topics": [
       {
@@ -90,6 +96,10 @@ export const pageConfig = {
       {
         "href": "#ga-practice",
         "text": "GA and practice questions"
+      },
+      {
+        "href": "#question-bank",
+        "text": "Graded assignment + 42-question mock bank"
       },
       {
         "href": "#assignments",
@@ -182,7 +192,7 @@ export const pageConfig = {
     "tocTitle": "Week 3 topics",
     "topics": [
       {
-        "href": "#overview",
+        "href": "#vision",
         "text": "Week 3 Overview"
       },
       {
@@ -337,5 +347,293 @@ export const pageConfig = {
         "text": "Supplied source materials"
       }
     ]
-  }
+  },
+  "week5": {
+      "title": "Week 5 — Optimization Strategies",
+      "description": "Gradient descent, learning rates, momentum, adaptive optimizers and the PyTorch update loop.",
+      "tocTitle": "Week 5 topics",
+      "topics": [
+          {
+              "href": "#overview",
+              "text": "Week 5 overview"
+          },
+          {
+              "href": "#gradient",
+              "text": "Gradient descent and the update rule"
+          },
+          {
+              "href": "#convex",
+              "text": "Convex optimization: local and global minima"
+          },
+          {
+              "href": "#variants",
+              "text": "Batch, stochastic and mini-batch gradient descent"
+          },
+          {
+              "href": "#learning-rate",
+              "text": "Learning rate and schedules"
+          },
+          {
+              "href": "#schedules",
+              "text": "Learning-rate schedules and accelerated methods"
+          },
+          {
+              "href": "#optimizers",
+              "text": "Momentum, Adagrad, RMSProp, Adadelta and Adam"
+          },
+          {
+              "href": "#pytorch",
+              "text": "Reading an optimizer training step"
+          },
+          {
+              "href": "#questions",
+              "text": "Week 5 questions and solutions"
+          },
+          {
+              "href": "#sources",
+              "text": "Sources and further practice"
+          }
+      ]
+  },
+  "week6": {
+      "title": "Week 6 — Generative Adversarial Networks",
+      "description": "How generator and discriminator networks learn through adversarial training.",
+      "tocTitle": "Week 6 topics",
+      "topics": [
+          {
+              "href": "#overview",
+              "text": "Generative models: from recognition to creation"
+          },
+          {
+              "href": "#architecture",
+              "text": "Generator and discriminator"
+          },
+          {
+              "href": "#objective",
+              "text": "The adversarial objective"
+          },
+          {
+              "href": "#training",
+              "text": "The two training loops"
+          },
+          {
+              "href": "#stability",
+              "text": "Training problems and evaluation"
+          },
+          {
+              "href": "#implementation",
+              "text": "Implementation pattern and loss-label logic"
+          },
+          {
+              "href": "#questions",
+              "text": "Week 6 questions and solutions"
+          },
+          {
+              "href": "#sources",
+              "text": "Sources and further practice"
+          }
+      ]
+  },
+  "week7": {
+      "title": "Week 7 — Recurrent Neural Networks",
+      "description": "Sequential data, recurrent state, BPTT, embeddings and sequence tasks.",
+      "tocTitle": "Week 7 topics",
+      "topics": [
+          {
+              "href": "#overview",
+              "text": "Sequential data and why order matters"
+          },
+          {
+              "href": "#rnn",
+              "text": "The recurrent neural network"
+          },
+          {
+              "href": "#training",
+              "text": "Backpropagation through time"
+          },
+          {
+              "href": "#task-types",
+              "text": "Common sequence input/output patterns"
+          },
+          {
+              "href": "#embeddings",
+              "text": "Text preprocessing and embeddings"
+          },
+          {
+              "href": "#questions",
+              "text": "Week 7 questions and solutions"
+          },
+          {
+              "href": "#sources",
+              "text": "Sources and further practice"
+          }
+      ]
+  },
+  "week8": {
+      "title": "Week 8 — LSTMs, GRUs and Sequence Learning",
+      "description": "LSTM and GRU gates, long-range memory, sentiment analysis and time-series prediction.",
+      "tocTitle": "Week 8 topics",
+      "topics": [
+          {
+              "href": "#overview",
+              "text": "Why vanilla RNNs are extended"
+          },
+          {
+              "href": "#lstm",
+              "text": "LSTM: cell state and gates"
+          },
+          {
+              "href": "#gru",
+              "text": "GRU: a simpler gated alternative"
+          },
+          {
+              "href": "#applications",
+              "text": "Sentiment analysis and time-series prediction"
+          },
+          {
+              "href": "#questions",
+              "text": "Week 8 questions and solutions"
+          },
+          {
+              "href": "#sources",
+              "text": "Sources and further practice"
+          }
+      ]
+  },
+  "week9": {
+      "title": "Week 9 — Attention and Neural Machine Translation",
+      "description": "Encoder-decoder translation, attention weights, teacher forcing, masking and BLEU.",
+      "tocTitle": "Week 9 topics",
+      "topics": [
+          {
+              "href": "#overview",
+              "text": "Neural machine translation and seq2seq"
+          },
+          {
+              "href": "#attention",
+              "text": "Attention: weighted context"
+          },
+          {
+              "href": "#training",
+              "text": "Teacher forcing, padding and decoding"
+          },
+          {
+              "href": "#evaluation",
+              "text": "Translation evaluation"
+          },
+          {
+              "href": "#questions",
+              "text": "Week 9 questions and solutions"
+          },
+          {
+              "href": "#sources",
+              "text": "Sources and further practice"
+          }
+      ]
+  },
+  "week10": {
+      "title": "Week 10 — Transformer Architecture",
+      "description": "Tokenization, embeddings, Q/K/V attention, Transformer blocks and language-model families.",
+      "tocTitle": "Week 10 topics",
+      "topics": [
+          {
+              "href": "#overview",
+              "text": "From token IDs to contextual representations"
+          },
+          {
+              "href": "#attention",
+              "text": "Scaled dot-product self-attention"
+          },
+          {
+              "href": "#architecture",
+              "text": "Transformer blocks and masking"
+          },
+          {
+              "href": "#language-models",
+              "text": "Encoder, decoder and encoder-decoder use cases"
+          },
+          {
+              "href": "#questions",
+              "text": "Week 10 questions and solutions"
+          },
+          {
+              "href": "#sources",
+              "text": "Sources and further practice"
+          }
+      ]
+  },
+  "week11": {
+      "title": "Week 11 — Diffusion Models",
+      "description": "Forward noising, learned denoising, DDIM, guidance and latent diffusion.",
+      "tocTitle": "Week 11 topics",
+      "topics": [
+          {
+              "href": "#overview",
+              "text": "Generative modelling and diffusion"
+          },
+          {
+              "href": "#forward",
+              "text": "Forward noising process"
+          },
+          {
+              "href": "#reverse",
+              "text": "Learning to denoise"
+          },
+          {
+              "href": "#sampling",
+              "text": "DDIM, guidance and latent diffusion"
+          },
+          {
+              "href": "#evaluation",
+              "text": "Evaluation and common misconceptions"
+          },
+          {
+              "href": "#questions",
+              "text": "Week 11 questions and solutions"
+          },
+          {
+              "href": "#sources",
+              "text": "Sources and further practice"
+          }
+      ]
+  },
+  "week12": {
+      "title": "Week 12 — Vision Transformers, RAG and Fine-Tuning",
+      "description": "Vision Transformer patch tokens, Retrieval-Augmented Generation, PEFT and LoRA.",
+      "tocTitle": "Week 12 topics",
+      "topics": [
+          {
+              "href": "#overview",
+              "text": "Modern GenAI: Vision Transformers, RAG and efficient adaptation"
+          },
+          {
+              "href": "#vit",
+              "text": "Vision Transformer: images as patch tokens"
+          },
+          {
+              "href": "#rag",
+              "text": "Retrieval-Augmented Generation (RAG)"
+          },
+          {
+              "href": "#lora",
+              "text": "PEFT and LoRA fine-tuning"
+          },
+          {
+              "href": "#finetune-workflow",
+              "text": "Fine-tuning workflow: documents to adapter"
+          },
+          {
+              "href": "#prompting",
+              "text": "Prompting, inference and evaluation"
+          },
+          {
+              "href": "#questions",
+              "text": "Week 12 questions and solutions"
+          },
+          {
+              "href": "#sources",
+              "text": "Sources and further practice"
+          }
+      ]
+  },
 };

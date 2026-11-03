@@ -1844,6 +1844,8 @@ for epoch in range(num_epochs):
     </section>
 
     <section id="ga2">
+      <p><strong>More practice:</strong> after finishing these questions, try the relevant DL/GenAI papers at <a href="https://quizpractice.space/" target="_blank" rel="noopener">QuizPractice</a>. Publicly listed papers are exam-practice references, not proof that a specific question will appear in your assessment.</p>
+
       <h2>13. Week 2 — Graded Assignment 2 preparation</h2>
 
       <p>
@@ -2399,7 +2401,70 @@ if torch.cuda.is_available():
       </ul>
     </section>
 
+    <section id="extra-question-bank-week2">
+  <h2>Additional Week 2 Question Bank: Training and Optimization</h2>
+  <p>Attempt each question before expanding the answer. These are original exam-style practice questions based on the Week 2 topics, not verbatim graded-assignment questions.</p>
+
+  <details class="question">
+    <summary>Q1. A parameter has current value w = 2, gradient dL/dw = 3, and learning rate 0.1. What is its value after one gradient-descent update?</summary>
+    <div class="answer">
+      <p><strong>Options:</strong> A. 2.3 · B. 1.7 · C. 1.97 · D. 5</p>
+      <p><strong>Answer:</strong> B. 1.7</p>
+      <p>Gradient descent uses w_new = w − η(dL/dw). Therefore, w_new = 2 − 0.1 × 3 = 1.7.</p>
+    </div>
+  </details>
+
+  <details class="question">
+    <summary>Q2. A model predicts [2, 1] for target values [1, 3]. Calculate the mean squared error (MSE).</summary>
+    <div class="answer">
+      <p><strong>Options:</strong> A. 1.5 · B. 2 · C. 2.5 · D. 5</p>
+      <p><strong>Answer:</strong> C. 2.5</p>
+      <p>The errors are 2 − 1 = 1 and 1 − 3 = −2. Squaring gives 1 and 4. Hence, MSE = (1 + 4) / 2 = 2.5.</p>
+    </div>
+  </details>
+
+  <details class="question">
+    <summary>Q3. A binary classifier predicts probability 0.99 for a sample whose true label is 0. What happens to binary cross-entropy loss?</summary>
+    <div class="answer">
+      <p><strong>Options:</strong> A. It is close to zero · B. It becomes large · C. It must equal 0.5 · D. It is independent of the prediction</p>
+      <p><strong>Answer:</strong> B. It becomes large</p>
+      <p>For a true label y = 0, binary cross-entropy is −log(1 − p). With p = 0.99, this becomes −log(0.01), a large loss. Confidently incorrect predictions are penalized strongly.</p>
+    </div>
+  </details>
+
+  <details class="question">
+    <summary>Q4. A dataset contains 1,025 samples. If the batch size is 64 and the final incomplete batch is retained, how many optimizer updates occur per epoch?</summary>
+    <div class="answer">
+      <p><strong>Options:</strong> A. 16 · B. 17 · C. 64 · D. 1,025</p>
+      <p><strong>Answer:</strong> B. 17</p>
+      <p>The number of batches is ceil(1025 / 64) = ceil(16.015625) = 17. Each batch normally produces one optimizer update.</p>
+    </div>
+  </details>
+
+  <details class="question">
+    <summary>Q5. Training loss continues to decrease, but validation loss starts increasing. Which issue is the most likely explanation?</summary>
+    <div class="answer">
+      <p><strong>Options:</strong> A. Underfitting · B. Overfitting · C. The model has no parameters · D. The validation set is being used as the training set</p>
+      <p><strong>Answer:</strong> B. Overfitting</p>
+      <p>The model is improving on training examples but generalizing less effectively to unseen validation examples. Possible responses include early stopping, regularization, dropout, or more suitable data augmentation.</p>
+    </div>
+  </details>
+
+  <details class="question">
+    <summary>Q6. In PyTorch, which loss is normally suitable for multi-class classification when each example belongs to exactly one class?</summary>
+    <div class="answer">
+      <p><strong>Options:</strong> A. Mean Absolute Error · B. CrossEntropyLoss · C. Mean Squared Error only · D. No loss function is required</p>
+      <p><strong>Answer:</strong> B. CrossEntropyLoss</p>
+      <p><code>torch.nn.CrossEntropyLoss</code> is commonly used with raw class logits and integer class-index targets. Do not apply softmax to the logits first when using this loss.</p>
+    </div>
+  </details>
+
+  <p><strong>Further practice:</strong> <a href="https://quizpractice.space/" target="_blank" rel="noopener">QuizPractice</a> · <a href="https://quizspacee.com/pyq/dl-genai/quiz-1" target="_blank" rel="noopener">DL/GenAI Quiz 1 past papers</a></p>
+</section>
+
     <section id="practice2">
+      <p><strong>More practice:</strong> after finishing these questions, try the relevant DL/GenAI papers at <a href="https://quizpractice.space/" target="_blank" rel="noopener">QuizPractice</a>. Publicly listed papers are exam-practice references, not proof that a specific question will appear in your assessment.</p>
+
       <h2>17. Week 2 — Practice Assignment 2</h2>
 
       <p>
@@ -2626,6 +2691,115 @@ if torch.cuda.is_available():
         PyTorch training and validation.
       </p>
     </section>
+    
+    
+<section id="ga-math-programming-week2">
+  <h2>Mathematical Intuition and GA-Level Practice</h2>
+
+  <h3>Part A — Understand the mathematics</h3>
+
+  <h4>1. Forward propagation is a sequence of transformations</h4>
+  <p>A neural network does not directly map an input to a prediction in one step. Every layer performs a linear transformation followed by an activation function:</p>
+  <p><code>z = Wx + b</code></p>
+  <p><code>a = f(z)</code></p>
+  <p>Here, W determines how input features are combined, b shifts the result, and f introduces nonlinearity. The next layer receives a as its input.</p>
+
+  <p><strong>Worked example:</strong> Let the first layer have an identity weight matrix, no bias, and ReLU activation. For x = [1, -2], the output is:</p>
+  <p><code>z = [1, -2]</code></p>
+  <p><code>ReLU(z) = [max(0,1), max(0,-2)] = [1,0]</code></p>
+  <p>If the next layer has weights [1, 1], no bias, and sigmoid activation, its logit is 1. The final prediction is sigmoid(1) ≈ <strong>0.731</strong>.</p>
+
+  <h4>2. Why the learning rate can cause oscillation</h4>
+  <p>Consider <code>L(w) = (w - 2)²</code>. Its derivative is <code>dL/dw = 2(w - 2)</code>. Gradient descent therefore gives:</p>
+  <p><code>w(t+1) = w(t) - 2η(w(t) - 2)</code></p>
+  <p>Rearranging around the minimum w = 2:</p>
+  <p><code>w(t+1) - 2 = (1 - 2η)(w(t) - 2)</code></p>
+  <p>If η = 1, the multiplier is -1. The parameter alternates between two values on opposite sides of the minimum. The loss remains unchanged across those alternating points. This explains why the condition <code>w(0) = w(2)</code> leads to η = <strong>1</strong> for this loss.</p>
+
+  <h4>3. Running averages and batch normalization</h4>
+  <p>Batch normalization can maintain a running mean using an exponential moving average:</p>
+  <p><code>μ(new) = (1 - α)μ(old) + αμ(batch)</code></p>
+  <p>After two batches, the running mean is:</p>
+  <p><code>μ₂ = (1 - α)²μ₀ + α(1 - α)μ(B₁) + αμ(B₂)</code></p>
+  <p>The most recent batch receives weight α, while earlier information is retained with a smaller weight. The same recurrence applies to the running variance.</p>
+
+  <h3>Part B — Programming intuition</h3>
+
+  <h4>1. How many optimizer updates happen?</h4>
+  <p>With ordinary SGD and one update per sample, 10,000 samples over 10 epochs produce 100,000 updates. With mini-batch SGD, the number of updates per epoch is usually the number of batches, not the number of samples.</p>
+
+  <pre><code>import torch
+
+x = torch.tensor([1.0, -2.0])
+layer1 = torch.nn.Linear(2, 2, bias=False)
+layer2 = torch.nn.Linear(2, 1, bias=True)
+
+with torch.no_grad():
+    layer1.weight.copy_(torch.eye(2))
+    layer2.weight.copy_(torch.tensor([[1.0, 1.0]]))
+    layer2.bias.zero_()
+
+h = torch.relu(layer1(x))
+logit = layer2(h)
+prediction = torch.sigmoid(logit)
+
+print(h)           # tensor([1., 0.])
+print(prediction)  # approximately tensor([0.7311])
+</code></pre>
+
+  <h4>2. Evaluation mode is not the same as disabling gradients</h4>
+  <ul>
+    <li><code>model.eval()</code> changes the behaviour of layers such as Dropout and BatchNorm.</li>
+    <li><code>torch.no_grad()</code> prevents gradient tracking for operations inside its context.</li>
+    <li>Neither operation automatically updates or trains model parameters.</li>
+  </ul>
+
+  <h3>Part C — GA-style questions with worked solutions</h3>
+
+  <details>
+    <summary>Q1. A feedforward network uses ordinary SGD, one update per sample, 10,000 samples and 10 epochs. How many parameter updates occur?</summary>
+    <p><strong>Answer:</strong> 100,000.</p>
+    <p><strong>Reasoning:</strong> Each epoch processes 10,000 samples. Total updates = 10,000 × 10 = 100,000. This assumes one update for every sample, with no skipped samples or gradient accumulation across multiple samples.</p>
+  </details>
+
+  <details>
+    <summary>Q2. A network uses ReLU on the output of an identity linear layer. The input is [1, -2]. The next layer has weights [1, 1], zero bias, and sigmoid activation. Find the final output to three decimal places.</summary>
+    <p><strong>Answer:</strong> 0.731.</p>
+    <p><strong>Solution:</strong> ReLU([1, -2]) = [1, 0]. The next layer produces z = 1(1) + 1(0) = 1. Sigmoid(1) = 1 / (1 + e⁻¹) ≈ 0.731.</p>
+  </details>
+
+  <details>
+    <summary>Q3. For L(w) = (w - 2)², gradient descent starts at w₀ = 1. The parameters alternate between w₀ and w₁. Find the positive learning rate.</summary>
+    <p><strong>Answer:</strong> η = 1.</p>
+    <p><strong>Solution:</strong> The gradient is 2(w - 2). The update is w(t+1) - 2 = (1 - 2η)(w(t) - 2). Alternation with equal-distance points on opposite sides requires the multiplier to be -1. Thus, 1 - 2η = -1, giving η = 1.</p>
+  </details>
+
+  <details>
+    <summary>Q4. The running-mean update is μ(new) = (1 - α)μ(old) + αμ(batch). Given α = 0.5, μ(B₁) = 10, μ(B₂) = 20 and μ₂ = 12.5, find μ₀.</summary>
+    <p><strong>Answer:</strong> μ₀ = 0.</p>
+    <p><strong>Solution:</strong> μ₂ = 0.25μ₀ + 0.25(10) + 0.5(20) = 0.25μ₀ + 12.5. Since μ₂ = 12.5, 0.25μ₀ = 0 and μ₀ = 0.</p>
+  </details>
+
+  <details>
+    <summary>Q5. A binary classifier predicts the majority class for every example in a dataset with 99% negative and 1% positive examples. Which metric can be misleading if considered alone?</summary>
+    <p><strong>Answer:</strong> Accuracy.</p>
+    <p><strong>Reasoning:</strong> Predicting every sample as negative gives 99% accuracy while detecting no positive examples. Inspect precision, recall, F1-score, the confusion matrix, and potentially precision-recall AUC as appropriate.</p>
+  </details>
+
+  <details>
+    <summary>Q6. A model outputs logits of shape (16, 10), and the target labels have shape (16,). What is the shape of the default mean loss returned by CrossEntropyLoss?</summary>
+    <p><strong>Answer:</strong> A scalar tensor, shape [] (zero dimensions).</p>
+    <p><strong>Reasoning:</strong> The default reduction is <code>mean</code>, so the per-example losses are averaged into one scalar. Using <code>reduction="none"</code> would instead return a loss for each example, with shape (16,).</p>
+  </details>
+
+  <details>
+    <summary>Q7. What is the difference between model.eval() and torch.no_grad() during evaluation?</summary>
+    <p><strong>Answer:</strong> They do different jobs. <code>model.eval()</code> changes evaluation behaviour of relevant layers; <code>torch.no_grad()</code> disables gradient recording inside its context. A typical evaluation loop uses both.</p>
+  </details>
+
+  <p><strong>Week 2 checklist:</strong> Be able to trace forward propagation numerically, derive a gradient-descent recurrence, expand an EMA update, calculate update counts, and predict PyTorch tensor and loss shapes.</p>
+</section>
+
 
   </article>
 </main>

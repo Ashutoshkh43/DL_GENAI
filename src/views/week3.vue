@@ -1298,6 +1298,8 @@ self.fc = nn.Linear(2048, 10)</code></pre>
 </section>
 
 <section id="practice">
+      <p><strong>More practice:</strong> after finishing these questions, try the relevant DL/GenAI papers at <a href="https://quizpractice.space/" target="_blank" rel="noopener">QuizPractice</a>. Publicly listed papers are exam-practice references, not proof that a specific question will appear in your assessment.</p>
+
     <h2>18. Week 3 Practice / GA-Style Questions</h2>
     <p>Try each question before opening its answer. These questions cover the concepts in your Week 3 topic list.</p>
 
@@ -1552,6 +1554,67 @@ self.fc = nn.Linear(2048, 10)</code></pre>
     </details>
 </section>
 
+<section id="extra-question-bank-week3">
+  <h2>Additional Week 3 Question Bank: CNN Calculations</h2>
+  <p>These original exam-style questions practise output dimensions, parameter counting, pooling and feature representations.</p>
+
+  <details class="question">
+    <summary>Q1. An input image has dimensions 32 × 32. A convolution uses a 5 × 5 kernel, stride 1 and no padding. What is the output height and width?</summary>
+    <div class="answer">
+      <p><strong>Options:</strong> A. 32 × 32 · B. 30 × 30 · C. 28 × 28 · D. 27 × 27</p>
+      <p><strong>Answer:</strong> C. 28 × 28</p>
+      <p>For dilation 1, the output dimension is floor((N + 2P − K) / S) + 1. Substituting N = 32, P = 0, K = 5 and S = 1 gives (32 − 5) + 1 = 28.</p>
+    </div>
+  </details>
+
+  <details class="question">
+    <summary>Q2. A convolution layer has 3 input channels, 16 filters of size 3 × 3, and one bias per filter. How many trainable parameters does it contain?</summary>
+    <div class="answer">
+      <p><strong>Options:</strong> A. 432 · B. 448 · C. 144 · D. 16</p>
+      <p><strong>Answer:</strong> B. 448</p>
+      <p>Each filter has 3 × 3 × 3 = 27 weights and one bias, giving 28 parameters per filter. Total = 28 × 16 = 448.</p>
+    </div>
+  </details>
+
+  <details class="question">
+    <summary>Q3. A feature map has spatial dimensions 28 × 28. A 2 × 2 max-pooling layer uses stride 2 and no padding. What are the resulting spatial dimensions?</summary>
+    <div class="answer">
+      <p><strong>Options:</strong> A. 28 × 28 · B. 14 × 14 · C. 13 × 13 · D. 7 × 7</p>
+      <p><strong>Answer:</strong> B. 14 × 14</p>
+      <p>Each pooling window covers 2 × 2 values and moves two positions at a time. Both spatial dimensions are halved: 28 / 2 = 14. The number of channels remains unchanged.</p>
+    </div>
+  </details>
+
+  <details class="question">
+    <summary>Q4. A 1 × 1 convolution receives 64 input channels and produces 10 output channels. If every output channel has a bias, how many trainable parameters are there?</summary>
+    <div class="answer">
+      <p><strong>Options:</strong> A. 640 · B. 650 · C. 74 · D. 10</p>
+      <p><strong>Answer:</strong> B. 650</p>
+      <p>Each output filter has 1 × 1 × 64 = 64 weights and one bias. The total is (64 + 1) × 10 = 650. A 1 × 1 convolution mixes information across channels at each spatial position.</p>
+    </div>
+  </details>
+
+  <details class="question">
+    <summary>Q5. A CNN produces a feature map of shape 7 × 7 × 512. Global average pooling is applied independently to each channel. What is the output shape?</summary>
+    <div class="answer">
+      <p><strong>Options:</strong> A. 7 × 7 × 512 · B. 49 × 512 · C. 512 · D. 2,048</p>
+      <p><strong>Answer:</strong> C. 512</p>
+      <p>Global average pooling averages the 7 × 7 spatial values in each channel. It produces one value for each of the 512 channels, giving a vector of length 512, with no trainable parameters in the pooling operation itself.</p>
+    </div>
+  </details>
+
+  <details class="question">
+    <summary>Q6. Which statement best describes the role of convolutional filters in a CNN?</summary>
+    <div class="answer">
+      <p><strong>Options:</strong> A. They assign a separate parameter to every image pixel in every example · B. They detect local patterns using shared weights · C. They always reduce the number of channels to one · D. They replace the need for training</p>
+      <p><strong>Answer:</strong> B. They detect local patterns using shared weights</p>
+      <p>A convolutional filter is applied at multiple spatial positions using the same weights. This parameter sharing helps detect patterns such as edges and textures while limiting the number of parameters.</p>
+    </div>
+  </details>
+
+  <p><strong>Further practice:</strong> <a href="https://quizpractice.space/" target="_blank" rel="noopener">QuizPractice</a> · <a href="https://quizspacee.com/pyq/dl-genai/quiz-1" target="_blank" rel="noopener">DL/GenAI Quiz 1 past papers</a></p>
+</section>
+
 <section id="revision">
     <h2>19. Rapid Revision Sheet</h2>
 
@@ -1737,6 +1800,108 @@ x = nn.MaxPool2d(2, 2)(x)</code></pre>
         <p>The logits have one row per sample and one column per class: <code>(16, 10)</code>. Class-index targets have shape <code>(16,)</code>. <code>nn.CrossEntropyLoss()</code> computes one loss per sample internally, then averages those 16 losses by default, returning one scalar. With <code>reduction="none"</code>, it would instead return shape <code>(16,)</code>.</p>
     </div>
 </div>
+
+<section id="ga-math-programming-week3">
+  <h2>Mathematical Intuition and GA-Level Practice</h2>
+
+  <h3>Part A — Understand convolution and pooling mathematically</h3>
+
+  <h4>1. Convolution output dimensions</h4>
+  <p>For a two-dimensional convolution with input dimension I, kernel size F, padding P, stride S and dilation 1:</p>
+  <p><code>O = floor((I + 2P - F) / S) + 1</code></p>
+  <p>Padding adds positions around the input. A larger kernel consumes more spatial area, while a larger stride moves the filter farther between positions.</p>
+
+  <p>For stride 1, preserving the input width and height requires <code>2P = F - 1</code>. Therefore, for an odd kernel size F, choose <code>P = (F - 1) / 2</code>.</p>
+
+  <h4>2. Channels, pooling and flattening</h4>
+  <p>Suppose the input shape is (1, 16, 16) and a 5 × 5 convolution uses no padding and stride 1. The output spatial size is:</p>
+  <p><code>(16 - 5) + 1 = 12</code></p>
+  <p>With four filters, the feature map becomes (4, 12, 12). A 2 × 2 max-pooling layer with stride 2 reduces this to (4, 6, 6). Flattening produces a vector with:</p>
+  <p><code>4 × 6 × 6 = 144</code> features.</p>
+
+  <h4>3. Parameter counting</h4>
+  <p>A convolution with C-in input channels, C-out output channels and a K × K kernel has:</p>
+  <p><code>Parameters = C-out × (C-in × K × K + 1)</code></p>
+  <p>The additional 1 represents one bias per output channel. A fully connected layer with N-in input features and N-out output units has:</p>
+  <p><code>Parameters = N-in × N-out + N-out</code></p>
+  <p>If the question explicitly says to ignore biases, omit the final term.</p>
+
+  <h3>Part B — Programming intuition</h3>
+
+  <h4>1. Predict shapes without running the code</h4>
+  <pre><code>import torch
+import torch.nn as nn
+
+x = nn.Conv2d(3, 16, 5)(
+    torch.randn(1, 3, 32, 32)
+)
+print(x.shape)
+
+x = nn.MaxPool2d(2, 2)(x)
+print(x.shape)
+</code></pre>
+  <p><strong>First output:</strong> (1, 16, 28, 28). The convolution uses a 5 × 5 kernel, stride 1 and padding 0.</p>
+  <p><strong>Second output:</strong> (1, 16, 14, 14). Pooling halves the spatial dimensions while preserving the 16 channels.</p>
+
+  <h4>2. Why AdaptiveMaxPool2d(1) is useful</h4>
+  <p><code>nn.AdaptiveMaxPool2d(1)</code> converts each channel's spatial map into one maximum value, regardless of its original height and width. For input shape (B, C, H, W), the output shape is (B, C, 1, 1). Flattening then produces (B, C), which can feed a classifier.</p>
+
+  <h3>Part C — GA-style questions with worked solutions</h3>
+
+  <details>
+    <summary>Q1. A convolution uses kernel size F = 5, stride 1 and padding P. What value of P preserves the input width and height?</summary>
+    <p><strong>Answer:</strong> P = 2.</p>
+    <p><strong>Solution:</strong> Set (I + 2P - 5) + 1 = I. Simplifying gives 2P = 4, so P = 2.</p>
+  </details>
+
+  <details>
+    <summary>Q2. An input has shape (1, 16, 16). Apply a 5 × 5 convolution with zero padding and stride 1. Give the output shape, including depth, if the convolution has one filter.</summary>
+    <p><strong>Answer:</strong> (1, 12, 12).</p>
+    <p><strong>Solution:</strong> Spatial dimension = (16 - 5) + 1 = 12. One filter produces one output channel.</p>
+  </details>
+
+  <details>
+    <summary>Q3. A feature map of shape (4, 12, 12) is passed through 2 × 2 max pooling with stride 2. What is the output shape?</summary>
+    <p><strong>Answer:</strong> (4, 6, 6).</p>
+    <p><strong>Reasoning:</strong> The height and width are halved. Pooling operates independently on each channel, so the depth remains 4.</p>
+  </details>
+
+  <details>
+    <summary>Q4. A flattened CNN feature vector has 144 values. A fully connected hidden layer has x neurons. Its weight matrix contains 2,880 parameters, excluding biases. Find x.</summary>
+    <p><strong>Answer:</strong> x = 20.</p>
+    <p><strong>Solution:</strong> The weight matrix has shape (20, 144) when using PyTorch's Linear convention, giving 144x = 2,880. Thus x = 2,880 / 144 = 20.</p>
+  </details>
+
+  <details>
+    <summary>Q5. A fully connected layer has 20 input units and 5 output units. How many weight parameters does it have if biases are ignored?</summary>
+    <p><strong>Answer:</strong> 100.</p>
+    <p><strong>Solution:</strong> Each of the 5 output units has one weight for each of the 20 inputs: 20 × 5 = 100.</p>
+  </details>
+
+  <details>
+    <summary>Q6. A convolution uses 3 input channels, 16 filters, a 5 × 5 kernel and one bias per filter. How many trainable parameters does it have?</summary>
+    <p><strong>Answer:</strong> 1,216.</p>
+    <p><strong>Solution:</strong> Each filter has 3 × 5 × 5 = 75 weights and one bias, or 76 parameters. Total = 76 × 16 = 1,216.</p>
+  </details>
+
+  <details>
+    <summary>Q7. A batch of 16 examples produces logits of shape (16, 10). Labels have shape (16,). What is the default CrossEntropyLoss output shape?</summary>
+    <p><strong>Answer:</strong> Scalar shape [], because the default reduction averages the losses across the batch.</p>
+  </details>
+
+  <details>
+    <summary>Q8. What is the output shape of AdaptiveMaxPool2d(1) when the input shape is (8, 128, 7, 7)?</summary>
+    <p><strong>Answer:</strong> (8, 128, 1, 1).</p>
+    <p><strong>Reasoning:</strong> The batch size and channel count remain unchanged; each spatial feature map is reduced to one maximum value.</p>
+  </details>
+
+  <details>
+    <summary>Q9. Why can the output of an Inception module combine parallel convolution branches by concatenation?</summary>
+    <p><strong>Answer:</strong> The branches extract features at different receptive-field sizes. Their outputs are concatenated along the channel dimension, so the batch size and spatial dimensions must match.</p>
+  </details>
+
+  <p><strong>Week 3 checklist:</strong> Calculate convolution output sizes, track channel counts, derive pooling and flattening shapes, count weights and biases, and reason about concatenation and adaptive pooling.</p>
+</section>
 
 </article>
 </main>

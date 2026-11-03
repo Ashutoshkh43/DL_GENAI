@@ -10,6 +10,14 @@ const pageTitles = {
   '/week2': 'Week 2 — Training & Practice | BSDA2001',
   '/week3': 'Week 3 — Convolutional Neural Networks | BSDA2001',
   '/week4': 'Week 4 — Transfer Learning & Segmentation | BSDA2001',
+  '/week5': 'Week 5 — Optimization Strategies | BSDA2001',
+  '/week6': 'Week 6 — Generative Adversarial Networks | BSDA2001',
+  '/week7': 'Week 7 — Recurrent Neural Networks | BSDA2001',
+  '/week8': 'Week 8 — LSTMs, GRUs and Sequence Learning | BSDA2001',
+  '/week9': 'Week 9 — Attention and Neural Machine Translation | BSDA2001',
+  '/week10': 'Week 10 — Transformer Architecture | BSDA2001',
+  '/week11': 'Week 11 — Diffusion Models | BSDA2001',
+  '/week12': 'Week 12 — Vision Transformers, RAG and Fine-Tuning | BSDA2001',
 };
 
 export default {

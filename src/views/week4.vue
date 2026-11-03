@@ -428,6 +428,8 @@ print("outputs", outputs.shape, outputs.dtype)</code></pre>
     </section>
 
     <section id="practice">
+      <p><strong>More practice:</strong> after finishing these questions, try the relevant DL/GenAI papers at <a href="https://quizpractice.space/" target="_blank" rel="noopener">QuizPractice</a>. Publicly listed papers are exam-practice references, not proof that a specific question will appear in your assessment.</p>
+
       <h2>15. Practice questions with answers</h2>
       <p>These are study questions written from the topics present in the supplied Week 4 materials; they are not claimed to be verbatim graded-assignment questions.</p>
       <details><summary>Q1. Why can transfer learning help with a small target dataset?</summary><div class="answer">The pretrained backbone has already learned useful visual features from a large source dataset. The target task can reuse those features and learn only a smaller task-specific head, reducing the amount of target data and compute needed.</div></details>
@@ -443,6 +445,67 @@ print("outputs", outputs.shape, outputs.dtype)</code></pre>
       <details><summary>Q11. In a residual block, what does `F(x) + x` mean?</summary><div class="answer">The block adds its learned residual mapping to the input shortcut. The tensors must have compatible dimensions for addition.</div></details>
       <details><summary>Q12. Name three checks to do before training a segmentation model.</summary><div class="answer">Check image and mask shapes, verify mask values and dtype, and run a forward pass to confirm the model output shape matches the target. Also verify that all tensors and the model are on the same device.</div></details>
     </section>
+
+    <section id="extra-question-bank-week4">
+  <h2>Additional Week 4 Question Bank: CNN Implementation</h2>
+  <p>These original practice questions focus on data preparation, classifier outputs, training and evaluation.</p>
+
+  <details class="question">
+    <summary>Q1. A dataset contains grayscale images of size 28 × 28. A batch contains 32 images. What shape is expected after conversion to PyTorch tensors in channel-first format?</summary>
+    <div class="answer">
+      <p><strong>Options:</strong> A. (32, 28, 28) · B. (32, 1, 28, 28) · C. (28, 28, 32) · D. (32, 28, 28, 1)</p>
+      <p><strong>Answer:</strong> B. (32, 1, 28, 28)</p>
+      <p>The standard batched PyTorch image format is (batch, channels, height, width). Grayscale images have one channel, so the shape is (32, 1, 28, 28).</p>
+    </div>
+  </details>
+
+  <details class="question">
+    <summary>Q2. A classification task has 10 mutually exclusive classes. What should be the number of output units in a standard classifier head?</summary>
+    <div class="answer">
+      <p><strong>Options:</strong> A. 1 · B. 3 · C. 10 · D. 28</p>
+      <p><strong>Answer:</strong> C. 10</p>
+      <p>The classifier normally produces one logit per class. During training, these logits can be passed to a suitable multi-class loss such as PyTorch's <code>CrossEntropyLoss</code>.</p>
+    </div>
+  </details>
+
+  <details class="question">
+    <summary>Q3. A model achieves 99% training accuracy but only 72% validation accuracy. What is the most likely concern?</summary>
+    <div class="answer">
+      <p><strong>Options:</strong> A. Overfitting · B. Perfect generalization · C. The model cannot learn · D. The output layer has no parameters</p>
+      <p><strong>Answer:</strong> A. Overfitting</p>
+      <p>The large gap between training and validation performance suggests the model may have learned patterns specific to its training data. Review data splits, regularization, augmentation and early stopping.</p>
+    </div>
+  </details>
+
+  <details class="question">
+    <summary>Q4. Why should validation or test evaluation normally use both <code>model.eval()</code> and a no-gradient context such as <code>torch.no_grad()</code>?</summary>
+    <div class="answer">
+      <p><strong>Options:</strong> A. They perform backpropagation faster · B. They disable all learned weights · C. They set evaluation behaviour for layers such as dropout and avoid unnecessary gradient tracking · D. They automatically retrain the model</p>
+      <p><strong>Answer:</strong> C</p>
+      <p><code>model.eval()</code> changes the behaviour of modules such as dropout and batch normalization where applicable. <code>torch.no_grad()</code> disables gradient recording for the enclosed computation, reducing memory and computation during evaluation.</p>
+    </div>
+  </details>
+
+  <details class="question">
+    <summary>Q5. Why might image augmentation such as random cropping or horizontal flipping improve a classifier?</summary>
+    <div class="answer">
+      <p><strong>Options:</strong> A. It guarantees 100% accuracy · B. It creates varied training examples and can improve generalization · C. It removes the need for labels · D. It always decreases training-set size</p>
+      <p><strong>Answer:</strong> B</p>
+      <p>Augmentation presents plausible variations of training images, helping the model become less dependent on exact image positions or appearances. Transformations must be appropriate for the task and preserve the intended label.</p>
+    </div>
+  </details>
+
+  <details class="question">
+    <summary>Q6. A batch contains 64 images and a classifier returns logits with shape (64, 10). What does the value 10 represent?</summary>
+    <div class="answer">
+      <p><strong>Options:</strong> A. The number of batches · B. The image height · C. The number of class scores per image · D. The number of convolution filters in every layer</p>
+      <p><strong>Answer:</strong> C</p>
+      <p>The first dimension is the batch size, 64. The second dimension contains 10 class logits for each image. The predicted class is commonly the index of the largest logit.</p>
+    </div>
+  </details>
+
+  <p><strong>Further practice:</strong> <a href="https://quizpractice.space/" target="_blank" rel="noopener">QuizPractice</a> · <a href="https://quizspacee.com/pyq/dl-genai/quiz-1" target="_blank" rel="noopener">DL/GenAI Quiz 1 past papers</a></p>
+</section>
 
     <section id="revision">
       <h2>16. Revision sheet</h2>
@@ -492,6 +555,139 @@ print("outputs", outputs.shape, outputs.dtype)</code></pre>
       </ul>
       <div class="note"><b>Assignment accuracy:</b> the supplied archives contained lecture notebooks and slides, but no separate clearly identified Week 4 graded-assignment question sheet was found in the listed materials. The questions in this page are therefore labelled as additional practice, not official assignment questions.</div>
     </section>
+    
+<section id="ga-math-programming-week4">
+  <h2>Mathematical Intuition and GA-Level Practice</h2>
+
+  <h3>Part A — Mathematical intuition</h3>
+
+  <h4>1. Residual connections</h4>
+  <p>A residual block commonly computes:</p>
+  <p><code>y = F(x) + x</code></p>
+  <p>Here, F(x) is the transformation learned by the block, while x is the shortcut connection. The addition is element-wise, so both tensors must have compatible shapes.</p>
+  <p>If a block changes the channel count or spatial resolution, the shortcut often needs a projection such as a convolution with an appropriate stride. Otherwise, the addition fails because the tensors do not match.</p>
+
+  <h4>2. Transfer learning and trainable parameters</h4>
+  <p>A pretrained model already has learned feature representations. Freezing its parameters with <code>requires_grad = False</code> prevents those parameters from receiving gradients. Replacing the final classifier with a new layer normally creates new trainable parameters.</p>
+  <p>For example, a linear classifier mapping 1,280 features to 3 classes has:</p>
+  <p><code>Weights = 1280 × 3 = 3840</code></p>
+  <p><code>Biases = 3</code></p>
+  <p><strong>Total = 3,843 parameters.</strong> If biases are disabled, the total is 3,840.</p>
+
+  <h4>3. Segmentation and classification are different tasks</h4>
+  <p>Image classification typically predicts one label per image. Semantic segmentation predicts a class for each pixel. A segmentation decoder progressively reconstructs spatial detail to produce a dense prediction map, often using upsampling and skip connections.</p>
+
+  <h3>Part B — Programming intuition</h3>
+
+  <h4>1. The order of image transformations matters</h4>
+  <pre><code>from torchvision import transforms
+
+train_transform = transforms.Compose([
+    transforms.Resize((100, 100)),
+    transforms.RandomHorizontalFlip(p=0.1),
+    transforms.RandomRotation(degrees=5),
+    transforms.ColorJitter(brightness=0.2, saturation=0.2),
+    transforms.ToTensor(),
+    transforms.Normalize(mean=image_mean, std=image_std),
+])
+</code></pre>
+  <p><strong>Important:</strong> <code>Normalize</code> expects a tensor, so <code>ToTensor()</code> must come before it. Random augmentation is typically used for training; validation and test preprocessing should be deterministic and consistent.</p>
+
+  <h4>2. ImageFolder directory layout</h4>
+  <pre><code>dataset/
+  train/
+    cats/
+      cat1.jpg
+      cat2.jpg
+    dogs/
+      dog1.jpg
+  val/
+    cats/
+    dogs/
+</code></pre>
+  <p><code>torchvision.datasets.ImageFolder</code> treats each immediate subdirectory as a class and infers labels from those class folders. If the task is multi-class image classification, each image should be placed in the folder for its class.</p>
+
+  <h4>3. Freezing a pretrained classifier correctly</h4>
+  <pre><code>import torch.nn as nn
+import torchvision.models as models
+
+model = models.efficientnet_b0(weights="DEFAULT")
+
+for p in model.parameters():
+    p.requires_grad = False
+
+model.classifier[1] = nn.Linear(1280, 3)
+
+trainable = sum(
+    p.numel() for p in model.parameters()
+    if p.requires_grad
+)
+print(trainable)  # 3843
+</code></pre>
+  <p>The replacement classifier is a newly created layer, so its parameters have <code>requires_grad=True</code> by default. The old feature extractor stays frozen. The optimizer can include all parameters, but only parameters with gradients will normally be updated.</p>
+
+  <h3>Part C — GA-style questions with worked solutions</h3>
+
+  <details>
+    <summary>Q1. A residual block computes F(x) = 2x + 1, and the shortcut is x. If x = -1, find the output before and after the skip connection.</summary>
+    <p><strong>Answer:</strong> Before skip connection: -1. After skip connection: -2.</p>
+    <p><strong>Solution:</strong> F(-1) = 2(-1) + 1 = -1. The residual output is F(x) + x = -1 + (-1) = -2.</p>
+  </details>
+
+  <details>
+    <summary>Q2. A segmentation model has an encoder and a decoder. What is the decoder's typical role?</summary>
+    <p><strong>Answer:</strong> To reconstruct spatial resolution and produce dense, pixel-level predictions from encoded features. It often upsamples feature maps and combines them with encoder features through skip connections.</p>
+  </details>
+
+  <details>
+    <summary>Q3. EfficientNet-B0 is loaded with pretrained weights. All parameters are frozen, then classifier[1] is replaced by Linear(1280, 3). Which parameters are trainable?</summary>
+    <p><strong>Answer:</strong> The new classifier's weights and biases.</p>
+    <p><strong>Reasoning:</strong> The original parameters have <code>requires_grad=False</code>. The replacement linear layer is a new module with trainable parameters by default. Its trainable parameter count is 1280 × 3 + 3 = 3,843.</p>
+  </details>
+
+  <details>
+    <summary>Q4. What is wrong with this transformation sequence: Resize, Normalize, ToTensor?</summary>
+    <p><strong>Answer:</strong> Normalize is applied before ToTensor.</p>
+    <p><strong>Solution:</strong> For the usual PIL-image pipeline, convert the image to a tensor first, then normalize it. The corrected order is Resize, ToTensor, Normalize. Training augmentations can be inserted before tensor conversion when the transforms support PIL inputs.</p>
+  </details>
+
+  <details>
+    <summary>Q5. What directory structure does ImageFolder expect for a two-class training set?</summary>
+    <p><strong>Answer:</strong> A root directory containing one subdirectory per class, with images inside each class directory, such as <code>train/cats/</code> and <code>train/dogs/</code>.</p>
+  </details>
+
+  <details>
+    <summary>Q6. An Inception module has parallel branches producing tensors with spatial dimensions 28 × 28. How are their outputs normally combined?</summary>
+    <p><strong>Answer:</strong> Concatenation along the channel dimension.</p>
+    <p><strong>Reasoning:</strong> The branches can have different channel counts, but their batch size and spatial height and width must match for channel-wise concatenation.</p>
+  </details>
+
+  <details>
+    <summary>Q7. A residual block maps an input tensor of shape (8, 64, 56, 56) to an output of shape (8, 128, 28, 28). What happens if you directly compute output + input?</summary>
+    <p><strong>Answer:</strong> The operation raises a tensor-shape mismatch error.</p>
+    <p><strong>Reasoning:</strong> The channel count differs (128 versus 64) and the spatial dimensions differ (28 × 28 versus 56 × 56). A projection shortcut or another appropriate shape-matching operation is required.</p>
+  </details>
+
+  <details>
+    <summary>Q8. VGG16 is pretrained. All parameters are frozen, then classifier[6] is replaced with Linear(4096, 5, bias=False). What does the trainable-parameter count become?</summary>
+    <p><strong>Answer:</strong> 20,480.</p>
+    <p><strong>Solution:</strong> The new layer has 4,096 input features and 5 output units. With no bias, the count is 4,096 × 5 = 20,480. The old classifier's replaced final layer is no longer part of the model.</p>
+  </details>
+
+  <details>
+    <summary>Q9. Why should validation and test transformations generally avoid random flips, random rotations and random colour jitter?</summary>
+    <p><strong>Answer:</strong> Evaluation should be repeatable and measure performance on consistently preprocessed data. Random augmentation is usually applied to training data to improve generalization, not to make validation results vary between evaluations.</p>
+  </details>
+
+  <details>
+    <summary>Q10. A linear layer is defined as Linear(4096, 5, bias=False). How many trainable parameters does it have?</summary>
+    <p><strong>Answer:</strong> 20,480.</p>
+    <p><strong>Solution:</strong> The weight matrix has shape (5, 4096), so there are 5 × 4096 weights and no bias terms.</p>
+  </details>
+
+  <p><strong>Week 4 checklist:</strong> Trace skip connections numerically, identify shape mismatches, count trainable parameters after replacing a classifier, fix transformation order, understand ImageFolder, and distinguish classification from segmentation.</p>
+</section>
+
   </article>
 </main>
 <footer class="site-footer">IIT Madras BS Data Science · BSDA2001 — Introduction to Deep Learning and Generative AI<br>Study the source-aligned topics, run the notebooks, and verify tensor shapes on a real batch.</footer>

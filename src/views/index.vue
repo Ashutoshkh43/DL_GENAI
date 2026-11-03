@@ -4,8 +4,19 @@
     <CourseSidebar page="index" />
     <article class="content">
       <div class="page-links">
+        <a class="page-link" href="/GAs">Graded Assignment →</a>
         <a class="page-link" href="/week1">Start Week 1: Foundations →</a>
         <a class="page-link" href="/week2">Continue to Week 2: Training &amp; Practice →</a>
+        <a class="page-link" href="/week3">Week 3: CNNs →</a>
+        <a class="page-link" href="/week4">Week 4: Transfer Learning →</a>
+        <a class="page-link" href="/week5">Week 5: Optimization →</a>
+        <a class="page-link" href="/week6">Week 6: GANs →</a>
+        <a class="page-link" href="/week7">Week 7: RNNs →</a>
+        <a class="page-link" href="/week8">Week 8: LSTM &amp; GRU →</a>
+        <a class="page-link" href="/week9">Week 9: Attention &amp; NMT →</a>
+        <a class="page-link" href="/week10">Week 10: Transformers →</a>
+        <a class="page-link" href="/week11">Week 11: Diffusion →</a>
+        <a class="page-link" href="/week12">Week 12: ViT, RAG &amp; Fine-tuning →</a>
       </div>
       <section id="how-to-use-these-notes">
         <div>
@@ -15,9 +26,9 @@
         </div>
         <span class="label">START HERE</span>
         <h2>How to use these notes</h2>
-        <p>Study Week 1 first: understand neurons, activations, tensors and the PyTorch workflow. Week 2 develops forward propagation, loss, optimisation, backpropagation and classification practice. Week 3 introduces CNNs for image classification. Week 4 extends that knowledge to transfer learning and pixel-level image segmentation with U-Net.</p>
+        <p>Study the pages in course order. Weeks 1–2 cover neural-network foundations, PyTorch, loss, optimization and training. Weeks 3–4 cover CNNs, transfer learning and segmentation. The supplied archives then cover optimization, GANs, RNN/LSTM/GRU sequence models, attention, Transformers, diffusion, Vision Transformers, RAG and parameter-efficient fine-tuning across Weeks 5–12. Each weekly page ends with a question bank and worked answers.</p>
         <div class="note"><b>Course alignment:</b> The IIT Madras BSDA2001 course page describes Week 2 as ANN practice with TensorFlow/Keras, activation functions, and optimization methods. PyTorch examples are included as supplementary framework practice.</div>
-        <p><b>Source materials now available:</b> these notes were expanded using the lecture-slide and live-coding archives uploaded for this project. Week 1 draws on the PyTorch introduction, tensor fundamentals, ANN recap, XOR and Fashion-MNIST resources; Week 2 draws on churn prediction, loss/optimisation slides and live coding; Week 3 draws on CNN fundamentals and the CNN live-coding materials; Week 4 now covers the supplied transfer-learning and U-Net segmentation materials. Week 4 practice questions are additional study questions, not claimed to be official graded-assignment questions. Equations use MathJax and may require an internet connection.</p>
+        <p><b>Source materials now available:</b> these notes were expanded using the lecture-slide and live-coding archives uploaded for this project. Week 1 draws on the PyTorch introduction, tensor fundamentals, ANN recap, XOR and Fashion-MNIST resources; Week 2 draws on churn prediction, loss/optimisation slides and live coding; Week 3 draws on CNN fundamentals and the CNN live-coding materials; Week 4 now covers the supplied transfer-learning and U-Net segmentation materials. The Week 1 page includes the supplied GA solution sheet and 42-question mock bank. Questions added for Weeks 2–12 are original practice based on the supplied resources, not claimed to be official graded assignments. Use <a href="https://quizpractice.space/" target="_blank" rel="noopener">QuizPractice</a> and the <a href="https://quizspacee.com/pyq/dl-genai" target="_blank" rel="noopener">DL/GenAI past-paper collection</a> for additional practice; full external question sets may require sign-in. Equations use MathJax and may require an internet connection.</p>
       </section>
       <section id="before-neural-networks-from-machine-learning-to-deep-learning">
         <span class="label">CONTEXT</span>
